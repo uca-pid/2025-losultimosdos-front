@@ -1,9 +1,11 @@
-import "./App.css";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/clerk-react";
+import { Button } from "@/components/ui/button";
 
-function App() {
-  return (
-    <h1 className="text-3xl font-bold underline text-red-500">Hello World</h1>
-  );
+export default function App() {
+  return <Button>Click me</Button>;
 }
-
-export default App;
