@@ -11,6 +11,7 @@ import ProfilePage from './components/ProfilePage';
 import './styles/pro.css';
 
 import AuthedLayout from './components/AuthedLayout';
+import { Routing } from './routes/routing';
 
 type Role = 'admin' | 'user';
 
@@ -61,68 +62,13 @@ const AppInner: React.FC = () => {
   };
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          !role ? <Navigate to="/login" replace /> : (role === 'admin' ? <Navigate to="/admin" replace /> : <Navigate to="/user" replace />)
-        }
-      />
-
-      {/* Públicas */}
-      <Route
-        path="/login"
-        element={<Login onLogin={handleLogin} onSwitchToSignup={() => navigate('/signup')} />}
-      />
-      <Route
-        path="/signup"
-        element={<Signup onSignup={handleSignup} onSwitchToLogin={() => navigate('/login')} />}
-      />
-
-      {/* User */}
-      <Route
-        path="/user"
-        element={
-          <RequireAuth allow={['user']}>
-            <AuthedLayout role="user">
-              {userId !== null ? <ClassList userId={userId} /> : <div>Error: invalid token</div>}
-            </AuthedLayout>
-          </RequireAuth>
-        }
-      />
-
-      {/* Admin */}
-      <Route
-        path="/admin"
-        element={
-          <RequireAuth allow={['admin']}>
-            <AuthedLayout role="admin">
-              <AdminDashboard />
-            </AuthedLayout>
-          </RequireAuth>
-        }
-      />
-
-      {/* Perfil (ambos roles) */}
-      <Route
-        path="/profile"
-        element={
-          <RequireAuth allow={['admin', 'user']}>
-            <AuthedLayout role={(role as Role)}>
-              <ProfilePage onLogout={onLogout} />
-            </AuthedLayout>
-          </RequireAuth>
-        }
-      />
-
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <Routing />
   );
 };
 
 const App: React.FC = () => (
   <BrowserRouter>
-    <AppInner />
+    <Routing />
   </BrowserRouter>
 );
 
