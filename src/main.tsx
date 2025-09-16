@@ -9,7 +9,6 @@ import SignUpPage from "./pages/signup-page.tsx";
 import VerifyEmailPage from "./pages/verify-email.tsx";
 import Home from "./pages/home.tsx";
 import { ThemeProvider } from "./components/theme-provider.tsx";
-import { dark } from "@clerk/themes";
 
 // Import your Publishable Key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -24,9 +23,9 @@ createRoot(document.getElementById("root")!).render(
       <ClerkProvider
         publishableKey={PUBLISHABLE_KEY}
         localization={esMX}
-        appearance={{ baseTheme: dark }}
+        // appearance={{ baseTheme: light }}
       >
-        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<LoginPage />} />
