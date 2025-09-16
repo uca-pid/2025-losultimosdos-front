@@ -14,7 +14,7 @@ export const columns: ColumnDef<GymClass>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Class Name
+          Nombre de la clase
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -38,7 +38,7 @@ export const columns: ColumnDef<GymClass>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Instructor
+          Profesor/a
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -46,26 +46,26 @@ export const columns: ColumnDef<GymClass>[] = [
   },
   {
     accessorKey: "date",
-    header: "Date",
+    header: "Fecha",
     cell: ({ row }) => {
       return new Date(row.getValue("date")).toLocaleDateString();
     },
   },
   {
     accessorKey: "time",
-    header: "Time",
+    header: "Hora",
   },
   {
     accessorKey: "capacity",
-    header: "Capacity",
+    header: "Capacidad",
   },
   {
     accessorKey: "enrolledStudents",
-    header: "Enrolled",
+    header: "Inscritos",
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: "Estado",
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       return (

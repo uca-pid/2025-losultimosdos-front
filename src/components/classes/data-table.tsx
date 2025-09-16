@@ -16,7 +16,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -43,7 +42,7 @@ export function DataTable<TData, TValue>({
   return (
     <div className="overflow-x-auto bg-muted rounded-sm p-2">
       <Table>
-        <TableHeader>
+        <TableHeader className="">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
