@@ -32,7 +32,7 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
-  const { openUserProfile } = useClerk();
+  const { openUserProfile, signOut } = useClerk();
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -87,7 +87,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => signOut()}>
               <IconLogout />
               Log out
             </DropdownMenuItem>

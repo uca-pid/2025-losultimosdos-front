@@ -1,8 +1,16 @@
 import { LoginFormSkeleton } from "@/components/skeletons/login-skeleton";
 import { SignIn, useSignIn } from "@clerk/react-router";
+import { useEffect } from "react";
+import { useClerk } from "@clerk/react-router";
 
 export default function LoginPage() {
   const { isLoaded } = useSignIn();
+  const { session } = useClerk();
+
+  useEffect(() => {
+    console.log("LoginPage");
+  }, []);
+
   return (
     <div className="grid min-h-svh lg:grid-cols-2 bg-gradient-to-br from-sky-200 via-white to-orange-100 animate-gradient-slow">
       <div className="flex flex-col gap-4 p-6 md:p-10">

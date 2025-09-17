@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@clerk/clerk-react";
+import apiService from "@/services/api.service";
 
 // Define the form schema with Zod
 const classFormSchema = z.object({
@@ -30,6 +32,7 @@ interface CreateClassProps {
 }
 
 export default function CreateClass({ onClassCreated }: CreateClassProps) {
+  const { getToken } = useAuth();
   const form = useForm<ClassFormValues>({
     resolver: zodResolver(classFormSchema),
     defaultValues: {
@@ -41,11 +44,15 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
     },
   });
 
-  const onSubmit = (data: ClassFormValues) => {
-    // In a real app, this would be an API call
-    console.log("Class created:", data);
-    onClassCreated?.(data);
-    form.reset();
+  const onSubmit = async (data: ClassFormValues) => {
+    const createClass = async () => {
+      const token = await getToken();
+      if (!token) return;
+      await apiService.post("/admin/class", data, token!);
+      onClassCreated?.(data);
+      form.reset();
+    };
+    createClass();
   };
 
   return (
