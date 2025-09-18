@@ -14,6 +14,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useUser } from "@clerk/react-router";
+import { useAuth } from "@clerk/clerk-react";
+import { Skeleton } from "./ui/skeleton";
 
 const data = {
   user: {
@@ -32,13 +34,15 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();
+  const { isLoaded } = useAuth();
+
   const userData = {
     name: user?.fullName || "",
     email: user?.emailAddresses[0].emailAddress || "",
     avatar: user?.imageUrl || "",
   };
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar variant="inset" collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -55,10 +59,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        {isLoaded ? (
+          <NavMain items={data.navMain} />
+        ) : (
+          <div className="flex flex-col gap-2 mt-3">
+            <Skeleton className="h-6 w-full rounded-md" />
+            <Skeleton className="h-6 w-full rounded-md" />
+            <Skeleton className="h-6 w-full rounded-md" />
+            <Skeleton className="h-6 w-full rounded-md" />
+          </div>
+        )}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={userData} />
+        {isLoaded ? (
+          <NavUser user={userData} />
+        ) : (
+          <Skeleton className="h-12 w-full rounded-md" />
+        )}
       </SidebarFooter>
     </Sidebar>
   );

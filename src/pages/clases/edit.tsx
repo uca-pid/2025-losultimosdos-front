@@ -6,52 +6,52 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@clerk/clerk-react";
 import apiService from "@/services/api.service";
+import { type GymClass } from "@/lib/mock-data";
 import { classFormSchema, type ClassFormValues } from "@/schema/classForm";
-import { useState } from "react";
 import toast from "react-hot-toast";
+// Define the form schema with Zod
 
-interface CreateClassProps {
-  onClassCreated?: (newClass: ClassFormValues) => void;
+interface EditClassProps {
+  classData: GymClass;
+  defaultValues: ClassFormValues;
+  onClassUpdated?: (updatedClass: ClassFormValues) => void;
 }
 
-export default function CreateClass({ onClassCreated }: CreateClassProps) {
+export default function EditClass({
+  classData,
+  onClassUpdated,
+  defaultValues,
+}: EditClassProps) {
   const { getToken } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  // Format the date from ISO to YYYY-MM-DD
+  const formatDate = (isoDate: string) => {
+    return new Date(isoDate).toISOString().split("T")[0];
+  };
+
   const form = useForm<ClassFormValues>({
     resolver: zodResolver(classFormSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      date: "",
-      time: "",
-      capacity: 10,
+      ...defaultValues,
+      date: formatDate(defaultValues.date),
     },
   });
 
   const onSubmit = async (data: ClassFormValues) => {
-    setIsLoading(true);
-    const createClass = async () => {
+    const updateClass = async () => {
       const token = await getToken();
       if (!token) return;
-      try {
-        await apiService.post("/admin/class", data, token!);
-        onClassCreated?.(data);
-        form.reset();
-        toast.success("Clase creada con éxito");
-      } catch (error) {
-        console.log(error);
-        toast.error("Error al crear la clase");
-      } finally {
-        setIsLoading(false);
-      }
+      await apiService.put(`/admin/class/${classData.id}`, data, token!);
+      onClassUpdated?.(data);
+      form.reset();
+      toast.success("Clase actualizada con éxito");
     };
 
-    createClass();
+    updateClass();
   };
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-8">Crear nueva clase</h1>
+      <h1 className="text-3xl font-bold mb-8">Editar clase</h1>
 
       <Card className="max-w-2xl mx-auto p-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -60,7 +60,7 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
             <Input
               id="name"
               {...form.register("name")}
-              placeholder="ejemplo: Yoga, Pilates, Spinning..."
+              placeholder="e.g., Morning Yoga"
               className="w-full"
             />
             {form.formState.errors.name && (
@@ -75,7 +75,7 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
             <Input
               id="description"
               {...form.register("description")}
-              placeholder="Descripcion de la clase"
+              placeholder="Describe the class..."
               className="w-full"
             />
             {form.formState.errors.description && (
@@ -134,8 +134,8 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
             )}
           </div>
 
-          <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? "Creando clase..." : "Crear clase"}
+          <Button type="submit" className="w-full">
+            Guardar cambios
           </Button>
         </form>
       </Card>
