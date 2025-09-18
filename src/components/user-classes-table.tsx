@@ -64,6 +64,10 @@ export const UserClassesTable = () => {
     fetchEnrolled();
   }, [getToken]);
 
+  useEffect(() => {
+    console.log("enrolling", enrolling);
+  }, [enrolling]);
+
   const enrolledIds = enrolledClasses.map((c) => c.id);
 
   const handleEnroll = async (classId: number) => {
@@ -92,6 +96,7 @@ export const UserClassesTable = () => {
   };
 
   const handleUnenroll = async (classId: number) => {
+    setEnrolling(classId);
     const token = await getToken();
     if (!token) return;
     await apiService.post("/user/unenroll", { classId }, token!);
@@ -109,6 +114,7 @@ export const UserClassesTable = () => {
         : []
     );
     toast.success("Te desinscribiste con éxito");
+    setEnrolling(null);
   };
 
   if (loading || !isLoaded)
@@ -159,16 +165,16 @@ export const UserClassesTable = () => {
                     <td className="px-4 py-2">
                       {clase.enrolled}/{clase.capacity}
                     </td>
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-2 flex justify-center items-center">
                       {isEnrolled ? (
-                        <span className="text-green-600 dark:text-green-400 font-semibold">
+                        <span className="text-green-600 dark:text-green-400  font-semibold">
                           Inscripto
                         </span>
                       ) : (
                         <Button
                           onClick={() => handleEnroll(clase.id)}
                           disabled={isFull || enrolling === clase.id}
-                          className="w-full"
+                          className=" w-[200px]"
                         >
                           {isFull
                             ? "Cupo lleno"
@@ -227,9 +233,14 @@ export const UserClassesTable = () => {
                       <Button
                         variant="destructive"
                         onClick={() => handleUnenroll(clase.id)}
-                        className="w-full"
+                        className={`w-full  ${
+                          enrolling === clase.id ? "opacity-50" : ""
+                        }`}
+                        disabled={enrolling === clase.id}
                       >
-                        Cancelar inscripción
+                        {enrolling === clase.id
+                          ? "Cancelando..."
+                          : "Cancelar inscripción"}
                       </Button>
                     </td>
                   </tr>
