@@ -57,12 +57,12 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Create New Class</h1>
+      <h1 className="text-3xl font-bold mb-8">Crear nueva clase</h1>
 
       <Card className="max-w-2xl mx-auto p-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Class Name</Label>
+            <Label htmlFor="name">Nombre de la clase</Label>
             <Input
               id="name"
               {...form.register("name")}
@@ -77,7 +77,7 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Decripcion</Label>
             <Input
               id="description"
               {...form.register("description")}
@@ -93,7 +93,7 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date">Fecha</Label>
               <Input
                 id="date"
                 type="date"
@@ -108,7 +108,7 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="time">Time</Label>
+              <Label htmlFor="time">Hora</Label>
               <Input
                 id="time"
                 type="time"
@@ -124,7 +124,7 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="capacity">Capacity</Label>
+            <Label htmlFor="capacity">Capacidad</Label>
             <Input
               id="capacity"
               type="number"
@@ -141,7 +141,7 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
           </div>
 
           <Button type="submit" className="w-full">
-            Create Class
+            Crear clase
           </Button>
         </form>
       </Card>
