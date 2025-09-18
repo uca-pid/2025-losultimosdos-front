@@ -136,42 +136,50 @@ export const UserClassesTable = () => {
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-            {classes.map((clase) => {
-              const isEnrolled = enrolledIds.includes(clase.id);
-              const isFull = clase.enrolled >= clase.capacity;
-              return (
-                <tr key={clase.id}>
-                  <td className="px-4 py-2">{clase.name}</td>
-                  <td className="px-4 py-2">{clase.description}</td>
-                  <td className="px-4 py-2">
-                    {new Date(clase.date).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-2">{formatTime(clase.time)}</td>
-                  <td className="px-4 py-2">
-                    {clase.enrolled}/{clase.capacity}
-                  </td>
-                  <td className="px-4 py-2">
-                    {isEnrolled ? (
-                      <span className="text-green-600 dark:text-green-400 font-semibold">
-                        Inscripto
-                      </span>
-                    ) : (
-                      <Button
-                        onClick={() => handleEnroll(clase.id)}
-                        disabled={isFull || enrolling === clase.id}
-                        className="w-full"
-                      >
-                        {isFull
-                          ? "Cupo lleno"
-                          : enrolling === clase.id
-                          ? "Inscribiendo..."
-                          : "Inscribirse"}
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
+            {classes.length > 0 ? (
+              classes.map((clase) => {
+                const isEnrolled = enrolledIds.includes(clase.id);
+                const isFull = clase.enrolled >= clase.capacity;
+                return (
+                  <tr key={clase.id}>
+                    <td className="px-4 py-2">{clase.name}</td>
+                    <td className="px-4 py-2">{clase.description}</td>
+                    <td className="px-4 py-2">
+                      {new Date(clase.date).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-2">{formatTime(clase.time)}</td>
+                    <td className="px-4 py-2">
+                      {clase.enrolled}/{clase.capacity}
+                    </td>
+                    <td className="px-4 py-2">
+                      {isEnrolled ? (
+                        <span className="text-green-600 dark:text-green-400 font-semibold">
+                          Inscripto
+                        </span>
+                      ) : (
+                        <Button
+                          onClick={() => handleEnroll(clase.id)}
+                          disabled={isFull || enrolling === clase.id}
+                          className="w-full"
+                        >
+                          {isFull
+                            ? "Cupo lleno"
+                            : enrolling === clase.id
+                            ? "Inscribiendo..."
+                            : "Inscribirse"}
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={6} className="h-24 text-center">
+                  No hay clases disponibles.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
