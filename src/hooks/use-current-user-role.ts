@@ -1,8 +1,7 @@
 // src/hooks/useCurrentUserRole.ts
 import { useUser } from "@clerk/clerk-react";
-import { type UserRole } from "../lib/roles";
 
-export function useCurrentUserRole(): typeof UserRole | null {
+export function useCurrentUserRole(): "admin" | "user" | null {
   const { user, isLoaded } = useUser();
 
   if (!isLoaded || !user) {
@@ -10,5 +9,5 @@ export function useCurrentUserRole(): typeof UserRole | null {
   }
 
   // Ensure publicMetadata.role is typed correctly
-  return (user.publicMetadata?.role as typeof UserRole) || null;
+  return (user.publicMetadata?.role as "admin" | "user") || null;
 }

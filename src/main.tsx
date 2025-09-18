@@ -31,17 +31,17 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/login",
+    path: "/login/*",
     element: <LoginPage />,
   },
   {
-    path: "/sign-up",
+    path: "/sign-up/*",
     element: <SignUpPage />,
   },
-  {
-    path: "/sign-up/verify-email-address",
-    element: <VerifyEmailPage />,
-  },
+  // {
+  //   path: "/sign-up/verify-email-address",
+  //   element: <VerifyEmailPage />,
+  // },
   {
     path: "/profile",
     element: (

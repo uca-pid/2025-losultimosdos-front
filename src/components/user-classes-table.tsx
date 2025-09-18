@@ -90,7 +90,7 @@ export const UserClassesTable = () => {
       toast.success("Inscripción realizada con éxito");
     } catch (error) {
       const err = error as { response?: { data?: { error?: string } } };
-      alert(err.response?.data?.error || "Error al inscribirse");
+      toast.error(err.response?.data?.error || "Error al inscribirse");
     }
     setEnrolling(null);
   };
@@ -99,21 +99,27 @@ export const UserClassesTable = () => {
     setEnrolling(classId);
     const token = await getToken();
     if (!token) return;
-    await apiService.post("/user/unenroll", { classId }, token!);
-    const [all, mine] = await Promise.all([
-      apiService.get("/classes", token!),
-      apiService.get("/user/my-classes", token!),
-    ]);
+    try {
+      await apiService.post("/user/unenroll", { classId }, token!);
+      const [all, mine] = await Promise.all([
+        apiService.get("/classes", token!),
+        apiService.get("/user/my-classes", token!),
+      ]);
 
-    setClasses(all.classes);
-    setEnrolledClasses(
-      Array.isArray(mine.classes)
-        ? mine.classes
-        : mine.enrollments
-        ? mine.enrollments.map((e: Enrollment) => e.class)
-        : []
-    );
-    toast.success("Te desinscribiste con éxito");
+      setClasses(all.classes);
+      setEnrolledClasses(
+        Array.isArray(mine.classes)
+          ? mine.classes
+          : mine.enrollments
+          ? mine.enrollments.map((e: Enrollment) => e.class)
+          : []
+      );
+      toast.success("Te desinscribiste con éxito");
+      setEnrolling(null);
+    } catch (error) {
+      const err = error as { response?: { data?: { error?: string } } };
+      toast.error(err.response?.data?.error || "Error al desinscribirse");
+    }
     setEnrolling(null);
   };
 

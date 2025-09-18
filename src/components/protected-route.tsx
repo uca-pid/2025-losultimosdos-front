@@ -2,14 +2,13 @@
 import React, { type ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { type UserRole } from "../lib/roles";
 import { useCurrentUserRole } from "../hooks/use-current-user-role";
 import Layout from "./layout";
 import { Skeleton } from "./ui/skeleton";
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  allowedRoles?: (typeof UserRole)[]; // Optional: if not provided, only authenticated users can access
+  allowedRoles?: ("admin" | "user")[]; // Optional: if not provided, only authenticated users can access
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
