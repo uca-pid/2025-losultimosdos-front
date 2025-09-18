@@ -11,6 +11,7 @@ import Home from "./pages/home.tsx";
 import { ThemeProvider } from "./components/theme-provider.tsx";
 import ProfilePage from "./pages/profile.tsx";
 import { ProtectedRoute } from "./components/protected-route.tsx";
+import { shadcn } from "@clerk/themes";
 
 // Import your Publishable Key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -59,7 +60,7 @@ createRoot(document.getElementById("root")!).render(
     <ClerkProvider
       publishableKey={PUBLISHABLE_KEY}
       localization={esMX}
-      // appearance={{ baseTheme: dark }}
+      appearance={{ baseTheme: shadcn }}
     >
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <RouterProvider router={router} />

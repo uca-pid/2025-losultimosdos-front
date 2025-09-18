@@ -1,14 +1,8 @@
 import { LoginFormSkeleton } from "@/components/skeletons/login-skeleton";
 import { SignIn, useSignIn } from "@clerk/react-router";
-import { useEffect } from "react";
-import { useClerk } from "@clerk/react-router";
+
 export default function LoginPage() {
   const { isLoaded } = useSignIn();
-  const { session } = useClerk();
-
-  useEffect(() => {
-    console.log("LoginPage");
-  }, []);
 
   return (
     <div

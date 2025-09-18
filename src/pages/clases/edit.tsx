@@ -36,8 +36,6 @@ export default function EditClass({
     },
   });
 
-  console.log("defaultValues", defaultValues);
-
   const onSubmit = async (data: ClassFormValues) => {
     const updateClass = async () => {
       const token = await getToken();

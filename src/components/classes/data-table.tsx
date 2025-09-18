@@ -17,12 +17,13 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { Button } from "../ui/button";
+import toast from "react-hot-toast";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  handleDelete: (id: number) => void;
-  handleEdit: (id: number) => void;
+  handleDelete: (id: number) => Promise<void>;
+  handleEdit: (id: number) => Promise<void>;
 }
 
 export function DataTable<TData extends { id: string | number }, TValue>({
@@ -91,13 +92,29 @@ export function DataTable<TData extends { id: string | number }, TValue>({
                 >
                   <Button
                     variant="outline"
-                    onClick={() => handleEdit(row.original.id as number)}
+                    onClick={async () => {
+                      try {
+                        await handleEdit(row.original.id as number);
+                        toast.success("Clase editada con éxito");
+                      } catch (error) {
+                        console.log(error);
+                        toast.error("Error al editar la clase");
+                      }
+                    }}
                   >
                     Editar
                   </Button>
                   <Button
                     variant="destructive"
-                    onClick={() => handleDelete(row.original.id as number)}
+                    onClick={async () => {
+                      try {
+                        await handleDelete(row.original.id as number);
+                        toast.success("Clase eliminada con éxito");
+                      } catch (error) {
+                        console.log(error);
+                        toast.error("Error al eliminar la clase");
+                      }
+                    }}
                   >
                     Eliminar
                   </Button>

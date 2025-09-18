@@ -7,13 +7,16 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@clerk/clerk-react";
 import apiService from "@/services/api.service";
 import { classFormSchema, type ClassFormValues } from "@/schema/classForm";
+import { useState } from "react";
 import toast from "react-hot-toast";
+
 interface CreateClassProps {
   onClassCreated?: (newClass: ClassFormValues) => void;
 }
 
 export default function CreateClass({ onClassCreated }: CreateClassProps) {
   const { getToken } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<ClassFormValues>({
     resolver: zodResolver(classFormSchema),
     defaultValues: {
@@ -26,13 +29,21 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
   });
 
   const onSubmit = async (data: ClassFormValues) => {
+    setIsLoading(true);
     const createClass = async () => {
       const token = await getToken();
       if (!token) return;
-      await apiService.post("/admin/class", data, token!);
-      onClassCreated?.(data);
-      form.reset();
-      toast.success("Clase creada con éxito");
+      try {
+        await apiService.post("/admin/class", data, token!);
+        onClassCreated?.(data);
+        form.reset();
+        toast.success("Clase creada con éxito");
+      } catch (error) {
+        console.log(error);
+        toast.error("Error al crear la clase");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     createClass();
@@ -123,8 +134,8 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
             )}
           </div>
 
-          <Button type="submit" className="w-full">
-            Crear clase
+          <Button type="submit" disabled={isLoading} className="w-full">
+            {isLoading ? "Creando clase..." : "Crear clase"}
           </Button>
         </form>
       </Card>

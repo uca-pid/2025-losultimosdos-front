@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { type GymClass } from "@/lib/mock-data";
 import CreateClass from "@/pages/clases/create";
 import EditClass from "@/pages/clases/edit";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { columns } from "./classes/columns";
 import { DataTable } from "./classes/data-table";
 import { useAuth } from "@clerk/clerk-react";
@@ -16,19 +16,16 @@ export const ClassesTable = () => {
   const { isSignedIn, isLoaded, getToken } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchClasses = async () => {
-      const token = await getToken();
-      if (!token) return;
-      const data = await apiService.get("/classes", token!);
-      setClasses(data.classes);
-    };
-    fetchClasses();
+  const fetchClasses = useCallback(async () => {
+    const token = await getToken();
+    if (!token) return;
+    const data = await apiService.get("/classes", token!);
+    setClasses(data.classes);
   }, [getToken]);
 
   useEffect(() => {
-    console.log(selectedClass);
-  }, [selectedClass]);
+    fetchClasses();
+  }, [getToken, fetchClasses]);
 
   if (isLoaded && !isSignedIn) {
     return navigate("/login");
@@ -37,8 +34,8 @@ export const ClassesTable = () => {
   const handleDelete = async (id: number) => {
     const token = await getToken();
     if (!token) return;
-    apiService.delete("/admin/class/" + id.toString(), token!);
-    setClasses(classes?.filter((c) => c.id !== id));
+    await apiService.delete("/admin/class/" + id.toString(), token!);
+    await fetchClasses();
   };
 
   const handleEdit = async (id: number) => {
@@ -70,17 +67,8 @@ export const ClassesTable = () => {
           </SheetTrigger>
           <SheetContent className="w-[90%] sm:w-[540px]" side="right">
             <CreateClass
-              onClassCreated={(newClass) => {
-                setClasses([
-                  ...(classes || []),
-                  {
-                    ...newClass,
-                    id: (classes?.length || 0) + 1,
-                    enrolled: 0,
-                    createdById: "TBD",
-                    users: [],
-                  },
-                ]);
+              onClassCreated={async () => {
+                await fetchClasses();
               }}
             />
           </SheetContent>
@@ -95,17 +83,8 @@ export const ClassesTable = () => {
             <EditClass
               classData={selectedClass}
               defaultValues={selectedClass}
-              onClassUpdated={(updatedClass) => {
-                setClasses(
-                  classes?.map((c) =>
-                    c.id === selectedClass.id
-                      ? {
-                          ...c,
-                          ...updatedClass,
-                        }
-                      : c
-                  ) || []
-                );
+              onClassUpdated={async () => {
+                await fetchClasses();
                 setSelectedClass(null);
               }}
             />

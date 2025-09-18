@@ -21,7 +21,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
         {children}
-              <Toaster />
+        <Toaster />
       </SidebarInset>
     </SidebarProvider>
   );
