@@ -1,19 +1,19 @@
 import z from "zod";
 
 export const classFormSchema = z.object({
-  name: z.string().min(3, "Class name must be at least 3 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
+  name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
+  description: z.string().min(10, "La descripcion debe tener al menos 10 caracteres"),
   date: z.string().refine((date) => {
     const selectedDate = new Date(date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return selectedDate >= today;
-  }, "Date must be in the future"),
+  }, "La fecha tiene que ser hoy o en el futuro"),
   time: z.string(),
   capacity: z
     .number()
-    .min(1, "Capacity must be at least 1")
-    .max(50, "Maximum capacity is 50"),
+    .min(1, "La capacidad debe ser al menos 1")
+    .max(50, "La capacidad no puede ser mayor a 50"),
 });
 
 export type ClassFormValues = z.infer<typeof classFormSchema>;

@@ -60,7 +60,7 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
             <Input
               id="name"
               {...form.register("name")}
-              placeholder="e.g., Morning Yoga"
+              placeholder="ejemplo: Yoga, Pilates, Spinning..."
               className="w-full"
             />
             {form.formState.errors.name && (
@@ -75,7 +75,7 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
             <Input
               id="description"
               {...form.register("description")}
-              placeholder="Describe the class..."
+              placeholder="Descripcion de la clase"
               className="w-full"
             />
             {form.formState.errors.description && (
