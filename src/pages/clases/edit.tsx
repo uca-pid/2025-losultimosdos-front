@@ -8,7 +8,7 @@ import { useAuth } from "@clerk/clerk-react";
 import apiService from "@/services/api.service";
 import { type GymClass } from "@/lib/mock-data";
 import { classFormSchema, type ClassFormValues } from "@/schema/classForm";
-
+import toast from "react-hot-toast";
 // Define the form schema with Zod
 
 interface EditClassProps {
@@ -45,6 +45,7 @@ export default function EditClass({
       await apiService.put(`/admin/class/${classData.id}`, data, token!);
       onClassUpdated?.(data);
       form.reset();
+      toast.success("Clase actualizada con éxito");
     };
 
     updateClass();

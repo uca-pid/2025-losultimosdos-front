@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@clerk/clerk-react";
 import apiService from "@/services/api.service";
 import { classFormSchema, type ClassFormValues } from "@/schema/classForm";
-
+import toast from "react-hot-toast";
 interface CreateClassProps {
   onClassCreated?: (newClass: ClassFormValues) => void;
 }
@@ -32,6 +32,7 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
       await apiService.post("/admin/class", data, token!);
       onClassCreated?.(data);
       form.reset();
+      toast.success("Clase creada con éxito");
     };
 
     createClass();

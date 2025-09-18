@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import apiService from "@/services/api.service";
+import toast from "react-hot-toast";
 
 interface GymClass {
   id: number;
@@ -78,6 +79,7 @@ export const UserClassesTable = () => {
           ? mine.enrollments.map((e: any) => e.class)
           : []
       );
+      toast.success("Inscripción realizada con éxito");
     } catch (error: any) {
       alert(error.response?.data?.error || "Error al inscribirse");
     }
@@ -101,6 +103,7 @@ export const UserClassesTable = () => {
         ? mine.enrollments.map((e: any) => e.class)
         : []
     );
+    toast.success("Te desinscribiste con éxito");
   };
 
   if (loading || !isLoaded)

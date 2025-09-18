@@ -5,6 +5,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { ModeToggle } from "./mode-toggle";
+import { Toaster } from "react-hot-toast";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -20,6 +21,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
         {children}
+              <Toaster />
       </SidebarInset>
     </SidebarProvider>
   );
