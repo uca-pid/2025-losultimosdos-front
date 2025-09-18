@@ -12,6 +12,7 @@ import { ThemeProvider } from "./components/theme-provider.tsx";
 import ProfilePage from "./pages/profile.tsx";
 import { ProtectedRoute } from "./components/protected-route.tsx";
 import { shadcn } from "@clerk/themes";
+import NotFound from "./pages/not-found";
 
 // Import your Publishable Key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -51,7 +52,7 @@ const router = createBrowserRouter([
   },
   {
     path: "*",
-    element: <h1>404</h1>, //to do
+    element: <NotFound />,
   },
 ]);
 

@@ -16,6 +16,10 @@ interface GymClass {
   users: string[];
 }
 
+interface Enrollment {
+  class: GymClass;
+}
+
 function formatTime(time: string) {
   if (/^\d{2}:\d{2}(:\d{2})?$/.test(time)) return time.slice(0, 5);
   const date = new Date(time);
@@ -53,7 +57,7 @@ export const UserClassesTable = () => {
         Array.isArray(res.classes)
           ? res.classes
           : res.enrollments
-          ? res.enrollments.map((e: any) => e.class)
+          ? res.enrollments.map((e: Enrollment) => e.class)
           : []
       );
     };
@@ -76,12 +80,13 @@ export const UserClassesTable = () => {
         Array.isArray(mine.classes)
           ? mine.classes
           : mine.enrollments
-          ? mine.enrollments.map((e: any) => e.class)
+          ? mine.enrollments.map((e: Enrollment) => e.class)
           : []
       );
       toast.success("Inscripción realizada con éxito");
-    } catch (error: any) {
-      alert(error.response?.data?.error || "Error al inscribirse");
+    } catch (error) {
+      const err = error as { response?: { data?: { error?: string } } };
+      alert(err.response?.data?.error || "Error al inscribirse");
     }
     setEnrolling(null);
   };
@@ -100,7 +105,7 @@ export const UserClassesTable = () => {
       Array.isArray(mine.classes)
         ? mine.classes
         : mine.enrollments
-        ? mine.enrollments.map((e: any) => e.class)
+        ? mine.enrollments.map((e: Enrollment) => e.class)
         : []
     );
     toast.success("Te desinscribiste con éxito");

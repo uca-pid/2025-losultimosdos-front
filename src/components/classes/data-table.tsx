@@ -23,14 +23,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   handleDelete: (id: number) => Promise<void>;
-  handleEdit: (id: number) => Promise<void>;
+  onEdit: (id: number) => void;
 }
 
 export function DataTable<TData extends { id: string | number }, TValue>({
   columns,
   data,
   handleDelete,
-  handleEdit,
+  onEdit,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const table = useReactTable({
@@ -54,7 +54,7 @@ export function DataTable<TData extends { id: string | number }, TValue>({
                 return (
                   <TableHead
                     key={header.id}
-                    className="text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase"
+                    className="text-left flex-1  text-xs font-medium text-gray-500 dark:text-gray-300 uppercase"
                   >
                     {header.isPlaceholder
                       ? null
@@ -67,7 +67,7 @@ export function DataTable<TData extends { id: string | number }, TValue>({
               })}
               <TableHead
                 key={`${headerGroup.id}-actions  `}
-                className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase"
+                className="flex justify-end items-center px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase"
               >
                 Acciones
               </TableHead>
@@ -88,19 +88,11 @@ export function DataTable<TData extends { id: string | number }, TValue>({
                 ))}
                 <TableCell
                   key={`${row.id}-actions`}
-                  className=" px-4 py-2 flex gap-4 justify-center"
+                  className=" px-4 py-2 flex gap-2 items-center justify-end"
                 >
                   <Button
                     variant="outline"
-                    onClick={async () => {
-                      try {
-                        await handleEdit(row.original.id as number);
-                        toast.success("Clase editada con éxito");
-                      } catch (error) {
-                        console.log(error);
-                        toast.error("Error al editar la clase");
-                      }
-                    }}
+                    onClick={() => onEdit(row.original.id as number)}
                   >
                     Editar
                   </Button>

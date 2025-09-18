@@ -27,9 +27,11 @@ export const ClassesTable = () => {
     fetchClasses();
   }, [getToken, fetchClasses]);
 
-  if (isLoaded && !isSignedIn) {
-    return navigate("/login");
-  }
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      navigate("/login");
+    }
+  }, [isLoaded, isSignedIn, navigate]);
 
   const handleDelete = async (id: number) => {
     const token = await getToken();
@@ -38,24 +40,9 @@ export const ClassesTable = () => {
     await fetchClasses();
   };
 
-  const handleEdit = async (id: number) => {
-    const token = await getToken();
-    if (!token) return;
-    const classToEdit = classes?.find((c) => c.id.toString() === id.toString());
-
-    apiService.put(
-      "/admin/class/" + id.toString(),
-      {
-        ...classToEdit,
-        id: id.toString(),
-      },
-      token!
-    );
-
-    if (classToEdit) {
-      setSelectedClass(classToEdit);
-    }
-  };
+  if (!isLoaded) {
+    return <div className="container mx-auto p-4">Cargando...</div>;
+  }
 
   return (
     <div className="container mx-auto space-y-4 p-4">
@@ -95,7 +82,9 @@ export const ClassesTable = () => {
         columns={columns}
         data={classes || []}
         handleDelete={handleDelete}
-        handleEdit={handleEdit}
+        onEdit={(id) =>
+          setSelectedClass(classes?.find((c) => c.id === id) || null)
+        }
       />
     </div>
   );
