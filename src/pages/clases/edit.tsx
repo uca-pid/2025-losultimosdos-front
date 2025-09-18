@@ -6,40 +6,53 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@clerk/clerk-react";
 import apiService from "@/services/api.service";
+import { type GymClass } from "@/lib/mock-data";
 import { classFormSchema, type ClassFormValues } from "@/schema/classForm";
 
-interface CreateClassProps {
-  onClassCreated?: (newClass: ClassFormValues) => void;
+// Define the form schema with Zod
+
+interface EditClassProps {
+  classData: GymClass;
+  defaultValues: ClassFormValues;
+  onClassUpdated?: (updatedClass: ClassFormValues) => void;
 }
 
-export default function CreateClass({ onClassCreated }: CreateClassProps) {
+export default function EditClass({
+  classData,
+  onClassUpdated,
+  defaultValues,
+}: EditClassProps) {
   const { getToken } = useAuth();
+  // Format the date from ISO to YYYY-MM-DD
+  const formatDate = (isoDate: string) => {
+    return new Date(isoDate).toISOString().split("T")[0];
+  };
+
   const form = useForm<ClassFormValues>({
     resolver: zodResolver(classFormSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      date: "",
-      time: "",
-      capacity: 10,
+      ...defaultValues,
+      date: formatDate(defaultValues.date),
     },
   });
 
+  console.log("defaultValues", defaultValues);
+
   const onSubmit = async (data: ClassFormValues) => {
-    const createClass = async () => {
+    const updateClass = async () => {
       const token = await getToken();
       if (!token) return;
-      await apiService.post("/admin/class", data, token!);
-      onClassCreated?.(data);
+      await apiService.put(`/admin/class/${classData.id}`, data, token!);
+      onClassUpdated?.(data);
       form.reset();
     };
 
-    createClass();
+    updateClass();
   };
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-8">Crear nueva clase</h1>
+      <h1 className="text-3xl font-bold mb-8">Editar clase</h1>
 
       <Card className="max-w-2xl mx-auto p-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -123,7 +136,7 @@ export default function CreateClass({ onClassCreated }: CreateClassProps) {
           </div>
 
           <Button type="submit" className="w-full">
-            Crear clase
+            Guardar cambios
           </Button>
         </form>
       </Card>

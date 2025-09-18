@@ -11,6 +11,8 @@ interface GymClass {
   time: string;
   capacity: number;
   enrolled: number;
+  createdById: string;
+  users: string[];
 }
 
 function formatTime(time: string) {
@@ -63,10 +65,10 @@ export const UserClassesTable = () => {
     setEnrolling(classId);
     const token = await getToken();
     try {
-      await apiService.post("/user/enroll", { classId }, token);
+      await apiService.post("/user/enroll", { classId }, token!);
       const [all, mine] = await Promise.all([
-        apiService.get("/classes", token),
-        apiService.get("/user/my-classes", token),
+        apiService.get("/classes", token!),
+        apiService.get("/user/my-classes", token!),
       ]);
       setClasses(all.classes);
       setEnrolledClasses(
@@ -80,6 +82,25 @@ export const UserClassesTable = () => {
       alert(error.response?.data?.error || "Error al inscribirse");
     }
     setEnrolling(null);
+  };
+
+  const handleUnenroll = async (classId: number) => {
+    const token = await getToken();
+    if (!token) return;
+    await apiService.post("/user/unenroll", { classId }, token!);
+    const [all, mine] = await Promise.all([
+      apiService.get("/classes", token!),
+      apiService.get("/user/my-classes", token!),
+    ]);
+
+    setClasses(all.classes);
+    setEnrolledClasses(
+      Array.isArray(mine.classes)
+        ? mine.classes
+        : mine.enrollments
+        ? mine.enrollments.map((e: any) => e.class)
+        : []
+    );
   };
 
   if (loading || !isLoaded)
@@ -96,11 +117,21 @@ export const UserClassesTable = () => {
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Nombre</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Descripción</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Fecha</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Hora</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Cupo</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                Nombre
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                Descripción
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                Fecha
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                Hora
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                Cupo
+              </th>
               <th className="px-4 py-2"></th>
             </tr>
           </thead>
@@ -112,19 +143,29 @@ export const UserClassesTable = () => {
                 <tr key={clase.id}>
                   <td className="px-4 py-2">{clase.name}</td>
                   <td className="px-4 py-2">{clase.description}</td>
-                  <td className="px-4 py-2">{new Date(clase.date).toLocaleDateString()}</td>
+                  <td className="px-4 py-2">
+                    {new Date(clase.date).toLocaleDateString()}
+                  </td>
                   <td className="px-4 py-2">{formatTime(clase.time)}</td>
-                  <td className="px-4 py-2">{clase.enrolled}/{clase.capacity}</td>
+                  <td className="px-4 py-2">
+                    {clase.enrolled}/{clase.capacity}
+                  </td>
                   <td className="px-4 py-2">
                     {isEnrolled ? (
-                      <span className="text-green-600 dark:text-green-400 font-semibold">Inscripto</span>
+                      <span className="text-green-600 dark:text-green-400 font-semibold">
+                        Inscripto
+                      </span>
                     ) : (
                       <Button
                         onClick={() => handleEnroll(clase.id)}
                         disabled={isFull || enrolling === clase.id}
                         className="w-full"
                       >
-                        {isFull ? "Cupo lleno" : enrolling === clase.id ? "Inscribiendo..." : "Inscribirse"}
+                        {isFull
+                          ? "Cupo lleno"
+                          : enrolling === clase.id
+                          ? "Inscribiendo..."
+                          : "Inscribirse"}
                       </Button>
                     )}
                   </td>
@@ -138,15 +179,23 @@ export const UserClassesTable = () => {
       <div className="mt-10">
         <h2 className="text-md font-bold mb-2">Tus clases inscriptas</h2>
         {enrolledClasses.length === 0 ? (
-          <div className="text-gray-500 dark:text-gray-400">No estás inscripto en ninguna clase.</div>
+          <div className="text-gray-500 dark:text-gray-400">
+            No estás inscripto en ninguna clase.
+          </div>
         ) : (
           <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Nombre</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Fecha</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Hora</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                    Nombre
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                    Fecha
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                    Hora
+                  </th>
                   <th className="px-4 py-2"></th>
                 </tr>
               </thead>
@@ -154,12 +203,14 @@ export const UserClassesTable = () => {
                 {enrolledClasses.map((clase) => (
                   <tr key={clase.id}>
                     <td className="px-4 py-2">{clase.name}</td>
-                    <td className="px-4 py-2">{new Date(clase.date).toLocaleDateString()}</td>
-                    <td className="px-4 py-2">{formatTime(clase.time)}</td>
                     <td className="px-4 py-2">
+                      {new Date(clase.date).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-2">{formatTime(clase.time)}</td>
+                    <td className="px-4 py-2 w-sm">
                       <Button
-                        variant="secondary"
-                        disabled
+                        variant="destructive"
+                        onClick={() => handleUnenroll(clase.id)}
                         className="w-full"
                       >
                         Cancelar inscripción
