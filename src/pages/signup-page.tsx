@@ -1,8 +1,6 @@
-import { LoginFormSkeleton } from "@/components/skeletons/login-skeleton";
-import { SignUp, useSignIn } from "@clerk/react-router";
+import { SignUp } from "@clerk/react-router";
 
 export default function SignUpPage() {
-  const { isLoaded } = useSignIn();
   return (
     <div
       className={[
@@ -15,11 +13,7 @@ export default function SignUpPage() {
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-md flex items-center justify-center">
-            {isLoaded ? (
-              <SignUp routing="path" path="/sign-up" signInUrl="/login" />
-            ) : (
-              <LoginFormSkeleton />
-            )}
+            <SignUp routing="path" path="/sign-up" signInUrl="/login" />
           </div>
         </div>
       </div>

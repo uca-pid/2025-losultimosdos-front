@@ -1,9 +1,6 @@
-import { LoginFormSkeleton } from "@/components/skeletons/login-skeleton";
-import { SignIn, useSignIn } from "@clerk/react-router";
+import { SignIn } from "@clerk/react-router";
 
 export default function LoginPage() {
-  const { isLoaded } = useSignIn();
-
   return (
     <div
       className={[
@@ -19,11 +16,7 @@ export default function LoginPage() {
             <h1 className="text-5xl font-extrabold tracking-tight text-center text-black dark:text-white">
               GymCloud
             </h1>
-            {isLoaded ? (
-              <SignIn routing="path" path="/login" signUpUrl="/sign-up" />
-            ) : (
-              <LoginFormSkeleton />
-            )}
+            <SignIn routing="path" path="/login" signUpUrl="/sign-up" />
           </div>
         </div>
       </div>
