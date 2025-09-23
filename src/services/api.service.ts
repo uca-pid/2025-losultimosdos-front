@@ -10,7 +10,7 @@ export class ApiValidationError extends Error {
 }
 
 export class ApiService {
-  private baseUrl = import.meta.env.VITE_API_URL;
+  private baseUrl = "http://localhost:8080";
   async post(endpoint: string, body: Record<string, unknown>, token: string) {
     const response = await fetch(this.baseUrl + endpoint, {
       method: "POST",
@@ -30,11 +30,11 @@ export class ApiService {
     return response;
   }
 
-  async get(endpoint: string, token: string) {
+  async get(endpoint: string, token?: string) {
     const response = await fetch(this.baseUrl + endpoint, {
       method: "GET",
       headers: {
-        Authorization: "Bearer " + token,
+        Authorization: token ? "Bearer " + token : "",
       },
     });
     if (response.status >= 500) {

@@ -1,3 +1,4 @@
+"use client";
 import {
   IconDotsVertical,
   IconLogout,
@@ -20,7 +21,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useClerk } from "@clerk/react-router";
+import { useClerk } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export function NavUser({
   user,
@@ -33,6 +35,13 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
   const { openUserProfile, signOut } = useClerk();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/sign-in");
+  };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -87,7 +96,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut()}>
+            <DropdownMenuItem onClick={handleSignOut}>
               <IconLogout />
               Log out
             </DropdownMenuItem>

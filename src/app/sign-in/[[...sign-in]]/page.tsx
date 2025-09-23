@@ -1,6 +1,12 @@
-import { SignIn } from "@clerk/react-router";
+import { SignIn } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const { isAuthenticated } = await auth();
+
+  if (isAuthenticated) return redirect("/");
+
   return (
     <div
       className={[
@@ -16,7 +22,7 @@ export default function LoginPage() {
             <h1 className="text-5xl font-extrabold tracking-tight text-center text-black dark:text-white">
               GymCloud
             </h1>
-            <SignIn routing="path" path="/login" signUpUrl="/sign-up" />
+            <SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" />
           </div>
         </div>
       </div>
