@@ -1,9 +1,12 @@
 import CreateClassSheet from "@/components/classes/create-class";
 import apiService from "@/services/api.service";
 import AdminTable from "@/components/classes/admin-table";
+import { GymClass } from "@/types";
 
 const AdminPage = async () => {
-  const response = await apiService.get("/classes");
+  const response = (await apiService.get("/classes")) as {
+    classes: GymClass[];
+  };
   const classes = response.classes;
 
   return (
@@ -12,7 +15,9 @@ const AdminPage = async () => {
         <h1 className="text-lg font-bold">Clases Disponibles</h1>
         <CreateClassSheet />
       </div>
-      <AdminTable classes={classes || []} />
+      <AdminTable
+        classes={classes.sort((a, b) => a.name.localeCompare(b.name)) || []}
+      />
     </div>
   );
 };
