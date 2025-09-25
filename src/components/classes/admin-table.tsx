@@ -25,17 +25,17 @@ interface AdminTableProps {
 const AdminTable = ({ classes }: AdminTableProps) => {
   const [selectedClass, setSelectedClass] = useState<GymClass | null>(null);
 
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const { getToken } = useAuth();
   const router = useRouter();
 
   const onDelete = async (id: number) => {
-    setIsDeleting(true);
+    setDeletingId(id);
     const token = await getToken();
     if (!token) return;
     await apiService.delete(`/admin/class/${id}`, token!);
     router.refresh();
-    setIsDeleting(false);
+    setDeletingId(null);
   };
 
   const onEdit = async (values: GymClass) => {
@@ -60,10 +60,10 @@ const AdminTable = ({ classes }: AdminTableProps) => {
             onClick={async () => {
               await onDelete(row.original.id);
             }}
-            disabled={isDeleting}
+            disabled={deletingId === row.original.id}
             className="cursor-pointer disabled:cursor-not-allowed w-24 "
           >
-            {isDeleting ? "Eliminando" : "Eliminar"}
+            {deletingId === row.original.id ? "Eliminando" : "Eliminar"}
           </Button>
         </div>
       ),
