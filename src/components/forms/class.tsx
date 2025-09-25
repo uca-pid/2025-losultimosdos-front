@@ -7,6 +7,7 @@ import * as z from "zod";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Input } from "../ui/input";
+import { DatePicker } from "../ui/date-picker";
 import {
   Form,
   FormControl,
@@ -18,6 +19,7 @@ import {
 } from "../ui/form";
 import { toast } from "react-hot-toast";
 import { useState } from "react";
+import { ApiValidationError } from "@/services/api.service";
 
 // Schema definition moved outside component for better reusability
 const classFormSchema = z.object({
@@ -26,11 +28,10 @@ const classFormSchema = z.object({
   description: z
     .string()
     .min(10, "La descripcion debe tener al menos 10 caracteres"),
-  date: z.string().refine((date) => {
-    const selectedDate = new Date(date);
+  date: z.date().refine((date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return selectedDate >= today;
+    return date >= today;
   }, "La fecha tiene que ser en el futuro"),
   time: z.string(),
   capacity: z
@@ -66,9 +67,7 @@ export const ClassForm = ({
       createdById: defaultValues?.createdById || "",
       users: defaultValues?.users || [],
       description: defaultValues?.description || "",
-      date: defaultValues?.date
-        ? new Date(defaultValues.date).toISOString().split("T")[0]
-        : "",
+      date: defaultValues?.date ? new Date(defaultValues.date) : undefined,
       time: defaultValues?.time || "",
       capacity: defaultValues?.capacity || 1,
     },
@@ -83,9 +82,13 @@ export const ClassForm = ({
       );
     } catch (error) {
       console.error(error);
-      toast.error(
-        isEdit ? "Error al editar la clase" : "Error al crear la clase"
-      );
+      if (error instanceof ApiValidationError) {
+        toast.error(error.details[0].message);
+      } else {
+        toast.error(
+          isEdit ? "Error al editar la clase" : "Error al crear la clase"
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -153,10 +156,11 @@ export const ClassForm = ({
                   <FormItem>
                     <FormLabel>Fecha</FormLabel>
                     <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        aria-label="Fecha de la clase"
+                      <DatePicker
+                        date={field.value}
+                        onDateChange={field.onChange}
+                        className="w-full"
+                        placeholder="Fecha"
                       />
                     </FormControl>
                     {!form.formState.errors.date && (
@@ -178,8 +182,9 @@ export const ClassForm = ({
                     <FormControl>
                       <Input
                         type="time"
-                        {...field}
                         aria-label="Hora de la clase"
+                        className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                        {...field}
                       />
                     </FormControl>
                     {!form.formState.errors.time && (

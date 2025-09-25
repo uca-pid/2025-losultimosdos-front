@@ -29,7 +29,7 @@ export default async function RootLayout({
     <ClerkProvider localization={esMX}>
       <html lang="es" className="h-full" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} flex min-h-full flex-col antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} flex min-h-full flex-col antialiased bg-sidebar`}
         >
           <ThemeProvider attribute="class" defaultTheme="dark">
             {children}

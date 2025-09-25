@@ -2,7 +2,7 @@ export interface GymClass {
   id: number;
   name: string;
   description: string;
-  date: string;
+  date: Date;
   time: string;
   capacity: number;
   enrolled: number;

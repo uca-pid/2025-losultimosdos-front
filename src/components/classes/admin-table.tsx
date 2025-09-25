@@ -43,6 +43,7 @@ const AdminTable = ({ classes }: AdminTableProps) => {
     if (!token) return;
     await apiService.put(`/admin/class/${values.id}`, { ...values }, token!);
     router.refresh();
+    setSelectedClass(null);
   };
 
   const adminColumns: ColumnDef<GymClass>[] = [
@@ -70,7 +71,10 @@ const AdminTable = ({ classes }: AdminTableProps) => {
   ];
 
   return (
-    <Sheet>
+    <Sheet
+      open={!!selectedClass}
+      onOpenChange={(open) => !open && setSelectedClass(null)}
+    >
       <DataTable
         columns={columns}
         data={classes}

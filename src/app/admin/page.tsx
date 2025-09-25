@@ -16,7 +16,11 @@ const AdminPage = async () => {
         <CreateClassSheet />
       </div>
       <AdminTable
-        classes={classes.sort((a, b) => a.name.localeCompare(b.name)) || []}
+        classes={
+          classes.sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          ) || []
+        }
       />
     </div>
   );

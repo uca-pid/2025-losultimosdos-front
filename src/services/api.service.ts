@@ -1,10 +1,15 @@
+interface ValidationDetail {
+  path: string;
+  message: string;
+}
+
 export class ApiValidationError extends Error {
-  public field: string;
+  public details: ValidationDetail[];
   public status?: number;
 
-  constructor(message: string, field: string, status?: number) {
-    super(message);
-    this.field = field;
+  constructor(details: ValidationDetail[], status?: number) {
+    super("Validation failed");
+    this.details = details;
     this.status = status;
   }
 }
@@ -24,8 +29,9 @@ export class ApiService {
       console.log(response.body, response.status);
       throw new Error("Server error");
     } else if (response.status >= 400) {
-      const { message, field } = await response.json();
-      throw new ApiValidationError(message, field, response.status);
+      const { error, details } = await response.json();
+
+      throw new ApiValidationError(details, response.status);
     }
     return response;
   }
@@ -41,8 +47,8 @@ export class ApiService {
       console.log(response.body, response.status);
       throw new Error("Server error");
     } else if (response.status >= 400) {
-      const { message, field } = await response.json();
-      throw new ApiValidationError(message, field);
+      const { error, details } = await response.json();
+      throw new ApiValidationError(details, response.status);
     }
     const data = await response.json();
     return data;
@@ -69,8 +75,8 @@ export class ApiService {
       console.log(response.body, response.status);
       throw new Error("Server error");
     } else if (response.status >= 400) {
-      const { message, field } = await response.json();
-      throw new ApiValidationError(message, field);
+      const { error, details } = await response.json();
+      throw new ApiValidationError(details, response.status);
     }
     return response;
   }
@@ -88,8 +94,8 @@ export class ApiService {
       console.log(response.body, response.status);
       throw new Error("Server error");
     } else if (response.status >= 400) {
-      const { message, field } = await response.json();
-      throw new ApiValidationError(message, field);
+      const { error, details } = await response.json();
+      throw new ApiValidationError(details, response.status);
     }
     return response;
   }
