@@ -21,7 +21,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useClerk } from "@clerk/nextjs";
+import { SignOutButton, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
 export function NavUser({
@@ -38,7 +38,7 @@ export function NavUser({
   const router = useRouter();
 
   const handleSignOut = async () => {
-    await signOut();
+    signOut();
     router.push("/sign-in");
   };
 
@@ -96,9 +96,13 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut}>
-              <IconLogout />
-              Log out
+            <DropdownMenuItem>
+              <SignOutButton signOutOptions={{ redirectUrl: "/sign-in" }}>
+                <div className="flex items-center gap-2">
+                  <IconLogout />
+                  Log out
+                </div>
+              </SignOutButton>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
