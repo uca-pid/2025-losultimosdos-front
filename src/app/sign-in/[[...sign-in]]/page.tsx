@@ -22,7 +22,12 @@ export default async function LoginPage() {
             <h1 className="text-5xl font-extrabold tracking-tight text-center text-black dark:text-white">
               GymCloud
             </h1>
-            <SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" />
+            <SignIn
+              routing="path"
+              path="/sign-in"
+              signUpUrl="/sign-up"
+              forceRedirectUrl={"/user"}
+            />
           </div>
         </div>
       </div>
