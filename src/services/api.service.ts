@@ -15,7 +15,7 @@ export class ApiValidationError extends Error {
 }
 
 export class ApiService {
-  private baseUrl = "http://localhost:8080";
+  private baseUrl = process.env.NEXT_PUBLIC_API_URL;
   async post(endpoint: string, body: Record<string, unknown>, token: string) {
     const response = await fetch(this.baseUrl + endpoint, {
       method: "POST",
