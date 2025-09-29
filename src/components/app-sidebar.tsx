@@ -1,5 +1,5 @@
 import * as React from "react";
-import { IconBook } from "@tabler/icons-react";
+import { IconBook, IconHome } from "@tabler/icons-react";
 import { Dumbbell } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -13,28 +13,29 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useUser } from "@clerk/react-router";
-import { useAuth } from "@clerk/clerk-react";
+
+import { currentUser } from "@clerk/nextjs/server";
 import { Skeleton } from "./ui/skeleton";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Clases",
-      url: "/clases",
-      icon: IconBook,
-    },
-  ],
-};
+export async function AppSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
+  const user = await currentUser();
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useUser();
-  const { isLoaded } = useAuth();
+  const data = {
+    user: {
+      name: "shadcn",
+      email: "m@example.com",
+      avatar: "/avatars/shadcn.jpg",
+    },
+    navMain: [
+      {
+        title: "Clases",
+        url: "/" + user?.publicMetadata?.role,
+        icon: IconBook,
+      },
+    ],
+  };
 
   const userData = {
     name: user?.fullName || "",
@@ -59,7 +60,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {isLoaded ? (
+        {user ? (
           <NavMain items={data.navMain} />
         ) : (
           <div className="flex flex-col gap-2 mt-3">
@@ -71,7 +72,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         )}
       </SidebarContent>
       <SidebarFooter>
-        {isLoaded ? (
+        {user ? (
           <NavUser user={userData} />
         ) : (
           <Skeleton className="h-12 w-full rounded-md" />

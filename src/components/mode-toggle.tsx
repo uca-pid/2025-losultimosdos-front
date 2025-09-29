@@ -1,34 +1,34 @@
-import { Moon, Sun } from "lucide-react";
+"use client";
+import { useTheme } from "next-themes";
+import { ThemeToggleButton } from "@/components/ui/shadcn-io/theme-toggle-button";
+import { useThemeTransition } from "@/components/ui/shadcn-io/theme-toggle-button";
+import { useState, useEffect, useCallback } from "react";
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useTheme } from "@/components/theme-provider";
+const ModeToggle = () => {
+  const { theme, setTheme } = useTheme();
+  const { startTransition } = useThemeTransition();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  const handleThemeToggle = useCallback(() => {
+    const newMode: "dark" | "light" = theme === "dark" ? "light" : "dark";
 
-export function ModeToggle() {
-  const { setTheme } = useTheme();
-
+    startTransition(() => {
+      setTheme(newMode);
+    });
+  }, [setTheme, startTransition]);
+  if (!mounted) {
+    return null;
+  }
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0 text-foreground" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <ThemeToggleButton
+      theme={theme as "dark" | "light"}
+      onClick={handleThemeToggle}
+      variant="circle-blur"
+      start="top-right"
+    />
   );
-}
+};
+
+export { ModeToggle };
