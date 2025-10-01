@@ -47,7 +47,7 @@ export const useEnrollClass = (userId: string, onSuccess?: () => void) => {
         )
       );
 
-      toast.success("Clase asignada correctamente");
+      toast.success("Clase asignada correctamente", { id: "enroll-class" });
       onSuccess?.();
       return { prevUserClasses, prevClasses };
     },
@@ -62,7 +62,7 @@ export const useEnrollClass = (userId: string, onSuccess?: () => void) => {
       if (context?.prevClasses) {
         queryClient.setQueryData(["classes"], context.prevClasses);
       }
-      toast.error("Error al asignar la clase");
+      toast.error("Error al asignar la clase", { id: "enroll-class" });
     },
 
     onSettled: () => {
@@ -114,7 +114,9 @@ export const useUnenrollClass = (userId: string) => {
         )
       );
 
-      toast.success("Clase desasignada correctamente");
+      toast.success("Clase desasignada correctamente", {
+        id: "unenroll-class",
+      });
 
       return { prevUserClasses, prevClasses };
     },
@@ -129,7 +131,7 @@ export const useUnenrollClass = (userId: string) => {
       if (context?.prevClasses) {
         queryClient.setQueryData(["classes"], context.prevClasses);
       }
-      toast.error("Error al desasignar la clase");
+      toast.error("Error al desasignar la clase", { id: "unenroll-class" });
     },
 
     onSettled: () => {
