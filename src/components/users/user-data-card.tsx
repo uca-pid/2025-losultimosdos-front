@@ -35,18 +35,22 @@ const UserDataCard = ({ user }: UserDataCardProps) => {
 
       return userService.updateUserRole(user.id, newRole, token!);
     },
-    onSuccess: () => {
+
+    onMutate: async (newRole) => {
+      await queryClient.cancelQueries({ queryKey: ["users", user.id] });
       queryClient.setQueryData(["users", user.id], (oldData: User) => {
-        return {
-          ...oldData,
-          role: user.role === "admin" ? "user" : "admin",
-        };
+        return { ...oldData, role: newRole };
       });
-      toast.success("Rol actualizado correctamente");
     },
+
     onError: (error) => {
       console.error("Error updating user role:", error);
       toast.error("Error al actualizar el rol del usuario");
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["users", user.id] });
+      toast.success("Rol actualizado correctamente");
     },
   });
 

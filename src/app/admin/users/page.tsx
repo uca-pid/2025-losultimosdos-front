@@ -6,9 +6,9 @@ import { columns } from "@/components/users/columns";
 import { useUsers } from "@/hooks/use-users";
 
 const UsersPage = () => {
-  const { data: users = [], isLoading, error } = useUsers();
+  const { data: users, isPending, error } = useUsers();
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="container mx-auto space-y-4 p-4">
         <div className="flex justify-between items-center mb-6">
