@@ -31,7 +31,7 @@ export function DataTable<TData extends { id: string | number }, TValue>({
   columns,
   data,
   extraColumns,
-  noDataMessage,
+  noDataMessage = "No hay datos disponibles.",
   headerClassName,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -94,7 +94,7 @@ export function DataTable<TData extends { id: string | number }, TValue>({
                 colSpan={columns.length + 1}
                 className="h-24 text-center"
               >
-                {noDataMessage || "No Hay clases disponibles."}
+                {noDataMessage}
               </TableCell>
             </TableRow>
           )}

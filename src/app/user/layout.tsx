@@ -11,7 +11,7 @@ import { Toaster } from "react-hot-toast";
 import { redirect } from "next/navigation";
 
 const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, userId } = await auth();
+  const { isAuthenticated } = await auth();
   const user = await currentUser();
 
   if (!isAuthenticated || user?.publicMetadata.role !== "user")
@@ -29,7 +29,7 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
             <ModeToggle />
           </div>
         </header>
-        {children}
+        <main className="container mx-auto space-y-4 p-4">{children}</main>
         <Toaster />
       </SidebarInset>
     </SidebarProvider>

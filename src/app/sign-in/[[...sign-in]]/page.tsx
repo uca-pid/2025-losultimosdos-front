@@ -26,7 +26,7 @@ export default async function LoginPage() {
               routing="path"
               path="/sign-in"
               signUpUrl="/sign-up"
-              forceRedirectUrl={"/user"}
+              forceRedirectUrl={"/user/classes"}
             />
           </div>
         </div>

@@ -16,7 +16,11 @@ export class ApiValidationError extends Error {
 
 export class ApiService {
   private baseUrl = process.env.NEXT_PUBLIC_API_URL;
-  async post(endpoint: string, body: Record<string, unknown>, token: string) {
+  async post<T = any>(
+    endpoint: string,
+    body: Record<string, unknown>,
+    token: string
+  ): Promise<T> {
     const response = await fetch(this.baseUrl + endpoint, {
       method: "POST",
       body: JSON.stringify(body),
@@ -33,7 +37,8 @@ export class ApiService {
 
       throw new ApiValidationError(details, response.status);
     }
-    return response;
+    const data = await response.json();
+    return data;
   }
 
   async get(endpoint: string, token?: string) {

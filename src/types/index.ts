@@ -9,3 +9,13 @@ export interface GymClass {
   createdById: string;
   users: string[];
 }
+
+export interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  imageUrl: string;
+  createdAt: string;
+  role: "admin" | "user";
+}
