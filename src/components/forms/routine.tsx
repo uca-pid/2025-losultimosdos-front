@@ -27,7 +27,31 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
+} from "@/components/ui/select";
+import {
+  Activity,
+  Dumbbell,
+  Flame,
+  Timer,
+  Heart,
+  type LucideIcon,
+} from "lucide-react";
+
+const ICON_OPTIONS: { value: string; label: string; Icon: LucideIcon }[] = [
+  { value: "activity", label: "Actividad / General", Icon: Activity },
+  { value: "dumbbell", label: "Fuerza", Icon: Dumbbell },
+  { value: "flame", label: "Cardio", Icon: Flame },
+  { value: "timer", label: "HIIT / Intervalos", Icon: Timer },
+  { value: "heart", label: "Salud / Bienestar", Icon: Heart },
+];
+
+export const ICONS: Record<string, LucideIcon> = {
+  activity: Activity,
+  dumbbell: Dumbbell,
+  flame: Flame,
+  timer: Timer,
+  heart: Heart,
+};
 
 interface RoutineExerciseWithData
   extends Omit<RoutineExercise, "id" | "routineId"> {
@@ -65,7 +89,7 @@ const routineFormSchema = z.object({
     .number()
     .min(1, "La duracion debe ser al menos 1 semana")
     .max(52, "La duracion no puede ser mayor a 52 semanas"),
-  icon: z.string().url("Debe ser una URL válida"),
+  icon: z.string(),
   exercises: z
     .array(routineExerciseSchema)
     .min(1, "La rutina debe tener al menos un ejercicio"),
@@ -191,19 +215,47 @@ export const RoutineForm = ({
           <FormField
             control={form.control}
             name="icon"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Icono (URL)</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="https://www.ejemplo.com/icono.png"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const Selected =
+                ICON_OPTIONS.find((o) => o.value === field.value)?.Icon || null;
+
+              return (
+                <FormItem>
+                  <FormLabel>Icono</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Elegí un icono" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {ICON_OPTIONS.map(({ value, label, Icon }) => (
+                        <SelectItem key={value} value={value}>
+                          <div className="flex items-center gap-2">
+                            <Icon className="h-4 w-4" />
+                            <span>{label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {Selected && (
+                    <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
+                      <Selected className="h-4 w-4" />
+                      <span>Vista previa</span>
+                    </div>
+                  )}
+
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
+
           <FormField
             control={form.control}
             name="exercises"

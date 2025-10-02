@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardHeader,
@@ -33,43 +33,34 @@ interface UserRoutine {
   createdAt: string;
 }
 
-// Mock data for user routines
 const mockUserRoutines: UserRoutine[] = [
-  {
-    id: 1,
-    name: "Rutina de Fuerza",
-    category: "Hipertrofia",
-    exercises: 8,
-    createdAt: "2025-09-25",
-  },
-  {
-    id: 2,
-    name: "Cardio Intenso",
-    category: "Cardio",
-    exercises: 5,
-    createdAt: "2025-09-20",
-  },
-  {
-    id: 3,
-    name: "Rutina Full Body",
-    category: "General",
-    exercises: 12,
-    createdAt: "2025-09-15",
-  },
-  {
-    id: 4,
-    name: "Pierna y Glúteo",
-    category: "Fuerza",
-    exercises: 10,
-    createdAt: "2025-09-10",
-  },
+  { id: 1, name: "Rutina de Fuerza", category: "Hipertrofia", exercises: 8, createdAt: "2025-09-25" },
+  { id: 2, name: "Cardio Intenso", category: "Cardio", exercises: 5, createdAt: "2025-09-20" },
+  { id: 3, name: "Rutina Full Body", category: "General", exercises: 12, createdAt: "2025-09-15" },
+  { id: 4, name: "Pierna y Glúteo", category: "Fuerza", exercises: 10, createdAt: "2025-09-10" },
 ];
 
 interface UserRoutinesCardProps {
   userId: string;
 }
 
+const useIsMobile = (query = "(max-width: 640px)") => {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia(query);
+    const onChange = (e: MediaQueryListEvent | MediaQueryList) =>
+      setIsMobile("matches" in e ? e.matches : (e as MediaQueryList).matches);
+    onChange(mql);
+    mql.addEventListener?.("change", onChange as any);
+    return () => mql.removeEventListener?.("change", onChange as any);
+  }, [query]);
+  return isMobile;
+};
+
 const UserRoutinesCard = ({ userId }: UserRoutinesCardProps) => {
+  const isMobile = useIsMobile();
+
   const [open, setOpen] = useState(false);
   const [routineName, setRoutineName] = useState("");
   const [routineCategory, setRoutineCategory] = useState("");
@@ -86,14 +77,10 @@ const UserRoutinesCard = ({ userId }: UserRoutinesCardProps) => {
 
       await apiService.post(
         `/admin/users/${userId}/routines`,
-        {
-          name: routineName,
-          category: routineCategory || "General",
-        },
+        { name: routineName, category: routineCategory || "General" },
         token
       );
 
-      // Reset form and close dialog
       setRoutineName("");
       setRoutineCategory("");
       setOpen(false);
@@ -159,18 +146,10 @@ const UserRoutinesCard = ({ userId }: UserRoutinesCardProps) => {
                 </div>
               </div>
               <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setOpen(false)}
-                >
+                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                   Cancelar
                 </Button>
-                <Button
-                  type="submit"
-                  onClick={handleAssignRoutine}
-                  disabled={assigning || !routineName.trim()}
-                >
+                <Button type="submit" onClick={handleAssignRoutine} disabled={assigning || !routineName.trim()}>
                   {assigning ? "Asignando..." : "Asignar Rutina"}
                 </Button>
               </DialogFooter>
@@ -179,67 +158,96 @@ const UserRoutinesCard = ({ userId }: UserRoutinesCardProps) => {
         </CardAction>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {mockUserRoutines.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-              No hay rutinas registradas para este usuario
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b dark:border-gray-700">
-                  <tr>
-                    <th className="text-left py-3 px-4 font-medium text-sm text-gray-500 dark:text-gray-400">
-                      Rutina
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium text-sm text-gray-500 dark:text-gray-400">
-                      Categoría
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium text-sm text-gray-500 dark:text-gray-400">
-                      Ejercicios
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium text-sm text-gray-500 dark:text-gray-400">
-                      Creada
-                    </th>
+        {mockUserRoutines.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+            No hay rutinas registradas para este usuario
+          </p>
+        ) : isMobile ? (
+          // ===== MOBILE: CARDS =====
+          <div className="space-y-3">
+            {mockUserRoutines.map((rt) => (
+              <div
+                key={rt.id}
+                className="rounded-lg border p-3 text-sm grid grid-cols-2 gap-2"
+              >
+                <div className="text-gray-500 dark:text-gray-400">Rutina</div>
+                <div className="text-right text-gray-900 dark:text-gray-100">
+                  {rt.name}
+                </div>
+
+                <div className="text-gray-500 dark:text-gray-400">Categoría</div>
+                <div className="text-right">
+                  <Badge variant="outline" className={getCategoryBadgeColor(rt.category)}>
+                    {rt.category}
+                  </Badge>
+                </div>
+
+                <div className="text-gray-500 dark:text-gray-400">Ejercicios</div>
+                <div className="text-right text-gray-900 dark:text-gray-100">
+                  {rt.exercises}
+                </div>
+
+                <div className="text-gray-500 dark:text-gray-400">Creada</div>
+                <div className="text-right text-gray-900 dark:text-gray-100">
+                  {new Date(rt.createdAt).toLocaleDateString("es-ES", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          // ===== DESKTOP/TABLET: TABLA =====
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b dark:border-gray-700">
+                <tr>
+                  <th className="text-left py-3 px-4 font-medium text-sm text-gray-500 dark:text-gray-400">
+                    Rutina
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium text-sm text-gray-500 dark:text-gray-400">
+                    Categoría
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium text-sm text-gray-500 dark:text-gray-400">
+                    Ejercicios
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium text-sm text-gray-500 dark:text-gray-400">
+                    Creada
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {mockUserRoutines.map((routine) => (
+                  <tr
+                    key={routine.id}
+                    className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    <td className="py-3 px-4 font-medium text-gray-900 dark:text-gray-100">
+                      {routine.name}
+                    </td>
+                    <td className="py-3 px-4">
+                      <Badge variant="outline" className={getCategoryBadgeColor(routine.category)}>
+                        {routine.category}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-4 text-gray-600 dark:text-gray-300">
+                      {routine.exercises}
+                    </td>
+                    <td className="py-3 px-4 text-gray-600 dark:text-gray-300">
+                      {new Date(routine.createdAt).toLocaleDateString("es-ES", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {mockUserRoutines.map((routine) => (
-                    <tr
-                      key={routine.id}
-                      className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                    >
-                      <td className="py-3 px-4 font-medium text-gray-900 dark:text-gray-100">
-                        {routine.name}
-                      </td>
-                      <td className="py-3 px-4">
-                        <Badge
-                          variant="outline"
-                          className={getCategoryBadgeColor(routine.category)}
-                        >
-                          {routine.category}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4 text-gray-600 dark:text-gray-300">
-                        {routine.exercises}
-                      </td>
-                      <td className="py-3 px-4 text-gray-600 dark:text-gray-300">
-                        {new Date(routine.createdAt).toLocaleDateString(
-                          "es-ES",
-                          {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          }
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -16,8 +16,8 @@ const UserInfoPage = () => {
   if (isLoading || isPending) {
     return (
       <div className="container mx-auto space-y-6 p-4">
-        <Skeleton className="h-8 w-48 rounded"></Skeleton>
-        <Skeleton className="h-64 rounded"></Skeleton>
+        <Skeleton className="h-8 w-48 rounded" />
+        <Skeleton className="h-64 rounded" />
       </div>
     );
   }

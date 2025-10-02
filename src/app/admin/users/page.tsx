@@ -1,9 +1,8 @@
 "use client";
 
-import { DataTable } from "@/components/ui/data-table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { columns } from "@/components/users/columns";
 import { useUsers } from "@/hooks/use-users";
+import AdminUserTable from "@/components/users/admin-table";
 
 const UsersPage = () => {
   const { data: users, isPending, error } = useUsers();
@@ -56,11 +55,7 @@ const UsersPage = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-lg font-bold">Usuarios</h1>
       </div>
-      <DataTable
-        columns={columns}
-        data={users}
-        headerClassName="first:w-[80px] first:min-w-[80px] first:justify-center first:items-center"
-      />
+      <AdminUserTable users={users ?? []} />
     </div>
   );
 };
