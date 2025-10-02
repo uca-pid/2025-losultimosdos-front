@@ -89,12 +89,10 @@ const AdminRoutineTable = ({
           <Button
             variant="destructive"
             onClick={() => deleteRoutine(row.original.id as number)}
-            disabled={isDeleting || deletingId === row.original.id}
+            disabled={deletingId === row.original.id}
             className="cursor-pointer disabled:cursor-not-allowed w-28"
           >
-            {isDeleting || deletingId === row.original.id
-              ? "Eliminando"
-              : "Eliminar"}
+            {deletingId === row.original.id ? "Eliminando" : "Eliminar"}
           </Button>
         </div>
       ),
