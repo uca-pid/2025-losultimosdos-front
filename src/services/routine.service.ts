@@ -38,7 +38,7 @@ class RoutineService {
     if (!token) {
       throw new Error("No authentication token available");
     }
-    const data = await this.apiService.get(`/admin/routines/${id}`, token);
+    const data = await this.apiService.get(`/routines/${id}`, token);
     return data as Routine & { exercises: RoutineExercise[] };
   }
 
@@ -91,6 +91,14 @@ class RoutineService {
       { userId },
       token
     );
+  }
+
+  async getUserRoutines(userId: string, token: string | null) {
+    if (!token) {
+      throw new Error("No authentication token available");
+    }
+    const data = await this.apiService.get(`/user/routines`, token);
+    return data.routines as (Routine & { exercises: RoutineExercise[] })[];
   }
 
   private transformExercises(exercises: RoutineExercise[]) {

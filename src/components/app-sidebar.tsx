@@ -1,5 +1,10 @@
 import * as React from "react";
-import { IconAd, IconBook, IconHome, IconUsers } from "@tabler/icons-react";
+import {
+  IconAd,
+  IconBook,
+  IconUsers,
+  IconStretching,
+} from "@tabler/icons-react";
 import { Dumbbell } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -43,17 +48,17 @@ export async function AppSidebar({
       },
 
       {
-        title:"Rutinas",
+        title: "Rutinas",
         url: "/" + user?.publicMetadata?.role + "/routines",
-        icon: IconHome,
-        roles: ["admin"],
+        icon: IconStretching,
+        roles: ["admin", "user"],
       },
       {
         title: "Ejercicios",
         url: "/" + user?.publicMetadata?.role + "/exercises",
         icon: IconAd,
         roles: ["admin"],
-      }
+      },
     ],
   };
 

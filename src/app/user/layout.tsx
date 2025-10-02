@@ -15,7 +15,7 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
   const user = await currentUser();
 
   if (!isAuthenticated || user?.publicMetadata.role !== "user")
-    return redirect("/");
+    return redirect("/admin/classes");
 
   return (
     <SidebarProvider>

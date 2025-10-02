@@ -72,7 +72,6 @@ const UserRoutinesCard = ({ userId }: UserRoutinesCardProps) => {
     queryFn: async () => {
       const token = await getToken();
       const response = await apiService.get(`/routines`, token!);
-      console.log("response.routines", response.items);
       return response.items || [];
     },
   });

@@ -85,7 +85,7 @@ export const RoutineExercises = ({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between"
+            className=" justify-between"
           >
             Agregar ejercicio
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -123,7 +123,7 @@ export const RoutineExercises = ({
         </PopoverContent>
       </Popover>
 
-      <div className="space-y-2">
+      <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {value.map((routineExercise, index) => (
           <Card key={routineExercise.exerciseId} className="p-4">
             <div className="flex items-center justify-between mb-2">
