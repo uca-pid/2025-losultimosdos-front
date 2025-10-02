@@ -7,26 +7,25 @@ import { ArrowUpDown } from "lucide-react";
 
 export const columns: ColumnDef<Exercise>[] = [
   {
-    accessorKey: "name",    
+    accessorKey: "name",
     header: ({ column }) => {
       return (
-        <Button 
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Nombre del ejercicio  
-            <ArrowUpDown className="ml-2 h-4 w-4" />
+          Nombre del ejercicio
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
-    }   
-    ,
+    },
     cell: ({ row }) => {
       return (
         <div>
           <div className="font-medium">{row.getValue("name")}</div>
           <div className="text-sm text-muted-foreground">
-            {row.original.description}
-            </div>  
+            {row.original.name}
+          </div>
         </div>
       );
     },
@@ -36,33 +35,33 @@ export const columns: ColumnDef<Exercise>[] = [
     header: ({ column }) => {
       return (
         <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}    
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Grupo muscular
-            <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => {
-      return <div>{row.getValue("muscleGroup")}</div>;
-    }   
-    },  
-    {
+      return <div>{row.original.muscleGroup.name}</div>;
+    },
+  },
+  {
     accessorKey: "equipment",
     header: ({ column }) => {
       return (
         <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Equipamiento
-            <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => {
-      return <div>{row.getValue("equipment") || "Ninguno"}</div>;   
+      return <div>{row.getValue("equipment") || "Ninguno"}</div>;
     },
-  },  
+  },
 ];

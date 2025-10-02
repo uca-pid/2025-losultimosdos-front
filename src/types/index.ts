@@ -28,12 +28,16 @@ export interface Routine {
   durationWeeks: number;
   icon: string;
 }
+
+export interface MuscleGroup {
+  id: number;
+  name: string;
+}
 export interface Exercise {
   id: number;
   description: string;
   name: string;
   videoUrl: string;
-  muscleGroup: string;
-  muscleGroupID:number;
+  muscleGroup: MuscleGroup;
   equipment: string;
 }

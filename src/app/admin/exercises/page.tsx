@@ -1,13 +1,10 @@
 import CreateExercise from "@/components/exercises/create-exercise";
 import AdminTable from "@/components/exercises/admin-table";
-import apiService from "@/services/api.service";
-import { Exercise } from "@/types";
+import exerciseService from "@/services/exercise.service";
 
 const AdminPage = async () => {
-  const response = (await apiService.get("/exercises")) as {
-    exercises: Exercise[];
-  };
-  const exercises = response.exercises;
+  const exercises = await exerciseService.getAllExercises();
+
   return (
     <div className="container mx-auto space-y-4 p-4">
       <div className="flex justify-between items-center mb-6">
@@ -15,7 +12,9 @@ const AdminPage = async () => {
         <CreateExercise />
       </div>
       <AdminTable
-        exercises={exercises.sort((a, b) => a.name.localeCompare(b.name)) || []}
+        exercises={
+          exercises?.sort((a, b) => a.name.localeCompare(b.name)) || []
+        }
       />
     </div>
   );

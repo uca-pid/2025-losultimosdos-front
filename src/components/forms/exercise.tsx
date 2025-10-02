@@ -28,21 +28,15 @@ import {
 import { toast } from "react-hot-toast";
 import apiService, { ApiValidationError } from "@/services/api.service";
 import { useAuth } from "@clerk/nextjs";
+import { useQuery } from "@tanstack/react-query";
 
-// ====== tipos y schema ======
 type MuscleGroup = { id: number; name: string };
 
 const exerciseFormSchema = z.object({
   id: z.number().optional(),
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
-  description: z
-    .string()
-    .min(10, "La descripción debe tener al menos 10 caracteres"),
-  // permite "" o URL válida
   videoUrl: z.union([z.literal(""), z.string().url("Debe ser una URL válida")]),
-  // debe ser number (no string/unknown)
   muscleGroupId: z.number().int().positive("Seleccioná un grupo muscular"),
-  // permite "" o string con mínimo 3
   equipment: z.union([
     z.literal(""),
     z.string().min(3, "El equipo debe tener al menos 3 caracteres"),
@@ -57,65 +51,35 @@ interface ExerciseFormProps {
   isEdit?: boolean;
 }
 
-const MUSCLE_GROUPS_ENDPOINT = "/admin/musclegroups";
-
-// ====== componente ======
 export const ExerciseForm: React.FC<ExerciseFormProps> = ({
   onSubmit,
   defaultValues,
   isEdit = false,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [groups, setGroups] = useState<MuscleGroup[]>([]);
-  const [groupsLoading, setGroupsLoading] = useState(true);
   const { getToken } = useAuth();
+
+  const { data: groups, isLoading: groupsLoading } = useQuery({
+    queryKey: ["groups"],
+    queryFn: async () => {
+      const token = await getToken();
+      const response = await apiService.get("/admin/muscle-group", token!);
+      return response.items as MuscleGroup[];
+    },
+  });
+
+  const equipmentOptions = ["Mancuernas", "Barra", "Máquina"];
 
   const form = useForm<ExerciseFormValues>({
     resolver: zodResolver(exerciseFormSchema),
-    // IMPORTANTÍSIMO: que los tipos calcen con el schema.
     defaultValues: {
       id: defaultValues?.id,
       name: defaultValues?.name ?? "",
-      description: defaultValues?.description ?? "",
       videoUrl: defaultValues?.videoUrl ?? "",
-      // number | undefined hasta que elijas en el Select
       muscleGroupId: defaultValues?.muscleGroupId,
       equipment: defaultValues?.equipment ?? "",
     },
   });
-
-  // cargar grupos
-  useEffect(() => {
-    (async () => {
-      try {
-        setGroupsLoading(true);
-        const token = await getToken();
-        if (!token) throw new Error("No se pudo obtener el token");
-
-        const res = await apiService.get(MUSCLE_GROUPS_ENDPOINT, token);
-        const items: MuscleGroup[] = Array.isArray(res) ? res : res?.items ?? [];
-        setGroups(items);
-
-        // si estás creando y no hay valor aún, preseleccioná el primero
-        const current = form.getValues("muscleGroupId");
-        if (!isEdit && !current && items.length > 0) {
-          form.setValue("muscleGroupId", items[0].id, { shouldValidate: true });
-        }
-      } catch (e: any) {
-        console.error(e);
-        toast.error("No se pudieron cargar los grupos musculares");
-      } finally {
-        setGroupsLoading(false);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const groupMap = useMemo(() => {
-    const m = new Map<number, string>();
-    groups.forEach((g) => m.set(g.id, g.name));
-    return m;
-  }, [groups]);
 
   const handleSubmit: SubmitHandler<ExerciseFormValues> = async (values) => {
     setIsLoading(true);
@@ -158,20 +122,6 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
 
           <FormField
             control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descripción</FormLabel>
-                <FormControl>
-                  <Input placeholder="Descripción del ejercicio" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="videoUrl"
             render={({ field }) => (
               <FormItem>
@@ -195,21 +145,21 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
                   <Select
                     value={field.value !== undefined ? String(field.value) : ""}
                     onValueChange={(val) => field.onChange(Number(val))}
-                    disabled={groupsLoading || groups.length === 0}
+                    disabled={groupsLoading || groups?.length === 0}
                   >
                     <SelectTrigger>
                       <SelectValue
                         placeholder={
                           groupsLoading
                             ? "Cargando grupos..."
-                            : groups.length
+                            : groups?.length
                             ? "Seleccioná un grupo"
                             : "Sin grupos disponibles"
                         }
                       />
                     </SelectTrigger>
                     <SelectContent>
-                      {groups.map((g) => (
+                      {groups?.map((g) => (
                         <SelectItem key={g.id} value={String(g.id)}>
                           {g.name}
                         </SelectItem>
@@ -218,12 +168,6 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
                   </Select>
                 </FormControl>
                 <FormMessage />
-                {/* opcional: mostrar el nombre actual debajo */}
-                {field.value && (
-                  <p className="text-xs text-muted-foreground">
-                    Seleccionado: {groupMap.get(Number(field.value))}
-                  </p>
-                )}
               </FormItem>
             )}
           />
@@ -235,7 +179,22 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
               <FormItem>
                 <FormLabel>Equipo necesario (opcional)</FormLabel>
                 <FormControl>
-                  <Input placeholder="Mancuernas, Barra, Máquina..." {...field} />
+                  <Select
+                    value={field.value !== undefined ? String(field.value) : ""}
+                    onValueChange={(val) => field.onChange(val)}
+                    disabled={groupsLoading || groups?.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccioná un equipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {equipmentOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -244,12 +203,7 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
 
           <Button
             type="submit"
-            disabled={
-              isLoading ||
-              groupsLoading ||
-              groups.length === 0 ||
-              form.getValues("muscleGroupId") === undefined
-            }
+            disabled={isLoading || groupsLoading || !form.formState.isDirty}
           >
             {isLoading
               ? "Guardando..."

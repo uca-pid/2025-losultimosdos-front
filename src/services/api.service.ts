@@ -8,7 +8,7 @@ export class ApiValidationError extends Error {
   public status?: number;
 
   constructor(details: ValidationDetail[], status?: number) {
-    super("Validation failed");
+    super("Validation failed " + status);
     this.details = details;
     this.status = status;
   }
@@ -42,7 +42,6 @@ export class ApiService {
   }
 
   async get(endpoint: string, token?: string) {
-
     const response = await fetch(this.baseUrl + endpoint, {
       method: "GET",
       headers: {

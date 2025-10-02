@@ -17,12 +17,10 @@ const CreateExercise = () => {
     const token = await getToken();
     if (!token) return;
 
-    // ajustá la ruta a la tuya real
     await apiService.post(
       "/admin/exercises",
       {
         name: values.name,
-        description: values.description,
         videoUrl: values.videoUrl || null,
         muscleGroupId: values.muscleGroupId,
         equipment: values.equipment || null,

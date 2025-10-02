@@ -49,7 +49,6 @@ const AdminTable = ({ exercises }: AdminTableProps) => {
       `/admin/exercises/${values.id}`,
       {
         name: values.name,
-        description: values.description,
         videoUrl: values.videoUrl || null,
         equipment: values.equipment || null,
         muscleGroupId: values.muscleGroupId,
@@ -62,17 +61,45 @@ const AdminTable = ({ exercises }: AdminTableProps) => {
   };
 
   const adminColumns: ColumnDef<Exercise>[] = [
+    ...columns,
     {
       accessorKey: "actions",
       header: "Acciones",
       cell: ({ row }) => (
         <div className="px-4 py-2 flex gap-2 items-center justify-end">
-          <SheetTrigger
-            onClick={() => setSelectedExercise(row.original)}
-            asChild
+          <Sheet
+            open={selectedExercise?.id === row.original.id}
+            onOpenChange={(open) => !open && setSelectedExercise(null)}
           >
-            <Button variant="outline">Editar</Button>
-          </SheetTrigger>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                onClick={() => setSelectedExercise(row.original)}
+              >
+                Editar
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="w-[90%] sm:w-[540px]" side="right">
+              <SheetHeader>
+                <SheetTitle className="text-2xl font-bold">
+                  Editar Ejercicio
+                </SheetTitle>
+              </SheetHeader>
+              <div className="mt-4">
+                <ExerciseForm
+                  defaultValues={{
+                    id: row.original.id,
+                    name: row.original.name,
+                    videoUrl: row.original.videoUrl ?? "",
+                    equipment: row.original.equipment ?? "",
+                    muscleGroupId: row.original.muscleGroup.id,
+                  }}
+                  onSubmit={onEdit}
+                  isEdit
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
           <Button
             variant="destructive"
             onClick={async () => {
@@ -85,45 +112,9 @@ const AdminTable = ({ exercises }: AdminTableProps) => {
         </div>
       ),
     },
-    ...columns,
   ];
 
-  return (
-    <>
-      <DataTable columns={adminColumns} data={exercises} />
-
-      <Sheet
-        open={!!selectedExercise}
-        onOpenChange={(open) => !open && setSelectedExercise(null)}
-      >
-        <SheetContent className="w-[90%] sm:w-[540px]" side="right">
-          <SheetHeader>
-            <SheetTitle className="text-2xl font-bold">
-              Editar Ejercicio
-            </SheetTitle>
-          </SheetHeader>
-
-          <div className="mt-4">
-            {selectedExercise && (
-              <ExerciseForm
-                // ✅ mapeamos directo al id
-                defaultValues={{
-                  id: selectedExercise.id,
-                  name: selectedExercise.name,
-                  description: selectedExercise.description ?? "",
-                  videoUrl: selectedExercise.videoUrl ?? "",
-                  equipment: selectedExercise.equipment ?? "",
-                  muscleGroupId: selectedExercise.muscleGroupID, // ← acá
-                }}
-                onSubmit={onEdit}
-                isEdit
-              />
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
-    </>
-  );
+  return <DataTable columns={adminColumns} data={exercises} />;
 };
 
 export default AdminTable;
