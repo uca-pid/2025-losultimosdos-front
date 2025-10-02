@@ -1,4 +1,5 @@
 import { ClerkProvider } from "@/components/clerk-provider";
+import { QueryProvider } from "@/components/query-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -32,7 +33,7 @@ export default async function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} flex min-h-full flex-col antialiased bg-sidebar`}
         >
           <ThemeProvider attribute="class" defaultTheme="dark">
-            {children}
+            <QueryProvider>{children}</QueryProvider>
           </ThemeProvider>
         </body>
       </html>

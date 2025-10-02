@@ -101,10 +101,14 @@ export function DataTable<TData extends { id: string | number }, TValue>({
                     onClick={async () => {
                       try {
                         await handleDelete(row.original.id as number);
-                        toast.success("Clase eliminada con éxito");
+                        toast.success("Clase eliminada con éxito", {
+                          id: "delete-class",
+                        });
                       } catch (error) {
                         console.log(error);
-                        toast.error("Error al eliminar la clase");
+                        toast.error("Error al eliminar la clase", {
+                          id: "delete-class",
+                        });
                       }
                     }}
                   >
