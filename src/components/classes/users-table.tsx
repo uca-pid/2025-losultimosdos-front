@@ -40,11 +40,14 @@ const UsersActionColumn = ({ row }: { row: Row<GymClass> }) => {
       toast.success(
         enrolled
           ? "Inscripción cancelada con éxito"
-          : "Inscripción realizada con éxito"
+          : "Inscripción realizada con éxito",
+        { id: "enroll-class" }
       );
       router.refresh();
     } catch (error) {
-      toast.error("Hubo un error al procesar tu solicitud");
+      toast.error("Hubo un error al procesar tu solicitud", {
+        id: "enroll-class",
+      });
     } finally {
       setIsLoading(false);
     }

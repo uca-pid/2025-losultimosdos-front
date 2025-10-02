@@ -1,5 +1,10 @@
 import * as React from "react";
-import { IconBook, IconHome } from "@tabler/icons-react";
+import {
+  IconAd,
+  IconBook,
+  IconUsers,
+  IconStretching,
+} from "@tabler/icons-react";
 import { Dumbbell } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -24,15 +29,35 @@ export async function AppSidebar({
 
   const data = {
     user: {
-      name: "shadcn",
-      email: "m@example.com",
-      avatar: "/avatars/shadcn.jpg",
+      name: user?.fullName || "",
+      email: user?.emailAddresses[0].emailAddress || "",
+      avatar: user?.imageUrl || "",
     },
     navMain: [
       {
         title: "Clases",
-        url: "/" + user?.publicMetadata?.role,
+        url: "/" + user?.publicMetadata?.role + "/classes",
         icon: IconBook,
+        roles: ["admin", "user"],
+      },
+      {
+        title: "Usuarios",
+        url: "/" + user?.publicMetadata?.role + "/users",
+        icon: IconUsers,
+        roles: ["admin"],
+      },
+
+      {
+        title: "Rutinas",
+        url: "/" + user?.publicMetadata?.role + "/routines",
+        icon: IconStretching,
+        roles: ["admin", "user"],
+      },
+      {
+        title: "Ejercicios",
+        url: "/" + user?.publicMetadata?.role + "/exercises",
+        icon: IconAd,
+        roles: ["admin"],
       },
     ],
   };
@@ -61,7 +86,11 @@ export async function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         {user ? (
-          <NavMain items={data.navMain} />
+          <NavMain
+            items={data.navMain.filter((item) =>
+              item.roles.includes(user.publicMetadata.role as string)
+            )}
+          />
         ) : (
           <div className="flex flex-col gap-2 mt-3">
             <Skeleton className="h-6 w-full rounded-md" />

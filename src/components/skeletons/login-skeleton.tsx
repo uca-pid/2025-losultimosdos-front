@@ -1,46 +1,41 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function LoginFormSkeleton() {
+export default function SignInSkeleton() {
   return (
-    <div className="flex flex-col space-y-6 w-[415px] h-[481px] mx-auto p-6 bg-white rounded-md shadow-md   ">
+    <div className="w-[400px] h-[485px] rounded-xl border bg-card p-6 shadow-sm">
       {/* Title */}
-      <div className="space-y-2 text-center">
-        <Skeleton className="h-8 w-48 mx-auto" />
-        <Skeleton className="h-4 w-64 mx-auto" />
+      <div className="space-y-2 text-center mb-6">
+        <Skeleton className="h-6 w-32 mx-auto" />
+        <Skeleton className="h-4 w-40 mx-auto" />
       </div>
 
-      {/* Social Buttons */}
-      <div className="grid grid-cols-3 gap-3">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
+      {/* OAuth buttons */}
+      <div className="flex justify-center gap-4 mb-6">
+        <Skeleton className="h-10 w-10 rounded-md" />
+        <Skeleton className="h-10 w-10 rounded-md" />
+        <Skeleton className="h-10 w-10 rounded-md" />
       </div>
 
       {/* Divider */}
-      <div className="relative">
-        <Skeleton className="h-[1px] w-full" />
-        <Skeleton className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 rounded-full" />
+      <div className="flex items-center gap-2 mb-6">
+        <Skeleton className="h-px w-full" />
+        <Skeleton className="h-4 w-4 rounded-full" />
+        <Skeleton className="h-px w-full" />
       </div>
 
-      {/* Email Input */}
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-10 w-full" />
+      {/* Email input */}
+      <div className="space-y-2 mb-6">
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-10 w-full rounded-md" />
       </div>
 
-      {/* Continue Button */}
-      <Skeleton className="h-10 w-full" />
+      {/* Continue button */}
+      <Skeleton className="h-10 w-full rounded-md mb-6" />
 
-      {/* Register Link */}
-      <div className="flex justify-center items-center gap-2">
-        <Skeleton className="h-4 w-32" />
+      {/* Footer text */}
+      <div className="flex justify-center gap-2">
         <Skeleton className="h-4 w-24" />
-      </div>
-
-      {/* Secured by Clerk */}
-      <div className="flex justify-center items-center gap-2">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-4 w-16" />
+        <Skeleton className="h-4 w-20" />
       </div>
     </div>
   );

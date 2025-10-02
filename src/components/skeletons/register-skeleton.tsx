@@ -1,0 +1,52 @@
+import { Skeleton } from "@/components/ui/skeleton";
+
+export default function SignUpSkeleton() {
+  return (
+    <div className="w-[400px] h-[645px] rounded-xl border bg-card p-6 shadow-sm">
+      {/* Title */}
+      <div className="space-y-2 text-center mb-6">
+        <Skeleton className="h-6 w-32 mx-auto" />
+        <Skeleton className="h-4 w-40 mx-auto" />
+      </div>
+
+      {/* OAuth buttons */}
+      <div className="flex justify-center gap-4 mb-6">
+        <Skeleton className="h-10 w-10 rounded-md" />
+        <Skeleton className="h-10 w-10 rounded-md" />
+        <Skeleton className="h-10 w-10 rounded-md" />
+      </div>
+
+      {/* Divider */}
+      <div className="flex items-center gap-2 mb-6">
+        <Skeleton className="h-px w-full" />
+        <Skeleton className="h-4 w-4 rounded-full" />
+        <Skeleton className="h-px w-full" />
+      </div>
+
+      {/* Name + Lastname */}
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <Skeleton className="h-10 w-full rounded-md" />
+        <Skeleton className="h-10 w-full rounded-md" />
+      </div>
+
+      {/* Email */}
+      <div className="mb-4">
+        <Skeleton className="h-10 w-full rounded-md" />
+      </div>
+
+      {/* Password */}
+      <div className="mb-6">
+        <Skeleton className="h-10 w-full rounded-md" />
+      </div>
+
+      {/* Continue button */}
+      <Skeleton className="h-10 w-full rounded-md mb-6" />
+
+      {/* Footer text */}
+      <div className="flex justify-center gap-2">
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-4 w-20" />
+      </div>
+    </div>
+  );
+}

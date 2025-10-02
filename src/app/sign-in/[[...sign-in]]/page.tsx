@@ -1,4 +1,5 @@
-import { SignIn } from "@clerk/nextjs";
+import SignInSkeleton from "@/components/skeletons/login-skeleton";
+import { ClerkLoaded, ClerkLoading, SignIn, useClerk } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
@@ -22,12 +23,17 @@ export default async function LoginPage() {
             <h1 className="text-5xl font-extrabold tracking-tight text-center text-black dark:text-white">
               GymCloud
             </h1>
-            <SignIn
-              routing="path"
-              path="/sign-in"
-              signUpUrl="/sign-up"
-              forceRedirectUrl={"/user"}
-            />
+            <ClerkLoading>
+              <SignInSkeleton />
+            </ClerkLoading>
+            <ClerkLoaded>
+              <SignIn
+                routing="path"
+                path="/sign-in"
+                signUpUrl="/sign-up"
+                forceRedirectUrl={"/user/classes"}
+              />
+            </ClerkLoaded>
           </div>
         </div>
       </div>

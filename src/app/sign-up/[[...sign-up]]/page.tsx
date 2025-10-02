@@ -1,4 +1,5 @@
-import { SignUp } from "@clerk/nextjs";
+import { ClerkLoaded, ClerkLoading, SignUp } from "@clerk/nextjs";
+import SignUpSkeleton from "@/components/skeletons/register-skeleton";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
@@ -18,7 +19,12 @@ export default async function SignUpPage() {
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-md flex items-center justify-center">
-            <SignUp routing="path" path="/sign-up" signInUrl="/sign-in" />
+            <ClerkLoading>
+              <SignUpSkeleton />
+            </ClerkLoading>
+            <ClerkLoaded>
+              <SignUp routing="path" path="/sign-up" signInUrl="/sign-in" />
+            </ClerkLoaded>
           </div>
         </div>
       </div>

@@ -78,15 +78,17 @@ export const ClassForm = ({
       setIsLoading(true);
       await onSubmit(values);
       toast.success(
-        isEdit ? "Clase editada correctamente" : "Clase creada correctamente"
+        isEdit ? "Clase editada correctamente" : "Clase creada correctamente",
+        { id: "create-class" }
       );
     } catch (error) {
       console.error(error);
       if (error instanceof ApiValidationError) {
-        toast.error(error.details[0].message);
+        toast.error(error.details[0].message, { id: "create-class" });
       } else {
         toast.error(
-          isEdit ? "Error al editar la clase" : "Error al crear la clase"
+          isEdit ? "Error al editar la clase" : "Error al crear la clase",
+          { id: "create-class" }
         );
       }
     } finally {
