@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -30,21 +30,6 @@ import apiService, { ApiValidationError } from "@/services/api.service";
 import { useAuth } from "@clerk/nextjs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CreatableCombobox } from "../creatable-combobox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { DeleteIcon, EllipsisIcon, PencilIcon } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "../ui/dialog";
-import MuscleGroupForm from "./muscle-group";
 import { Skeleton } from "../ui/skeleton";
 
 type MuscleGroup = { id: number; name: string };
@@ -75,8 +60,6 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { getToken } = useAuth();
-  const [openModal, setOpenModal] = useState(false);
-  const [values, setValues] = useState<MuscleGroup | null>(null);
   const queryClient = useQueryClient();
   const { data: groups, isLoading: groupsLoading } = useQuery({
     queryKey: ["groups"],
@@ -223,11 +206,6 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
           </Button>
         </form>
       </Form>
-      <MuscleGroupForm
-        values={values || { id: 0, name: "" }}
-        openModal={openModal}
-        setOpenModal={setOpenModal}
-      />
     </Card>
   );
 };

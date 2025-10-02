@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "../ui/dialog";
 import {
   Form,
@@ -18,13 +17,13 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { MuscleGroup } from "@/types";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import apiService from "@/services/api.service";
 import { toast } from "react-hot-toast";
 import { useAuth } from "@clerk/nextjs";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const muscleGroupFormSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
@@ -43,6 +42,7 @@ const MuscleGroupForm = ({
   setOpenModal: (open: boolean) => void;
 }) => {
   const { getToken } = useAuth();
+  const queryClient = useQueryClient();
   const form = useForm<MuscleGroupFormValues>({
     resolver: zodResolver(muscleGroupFormSchema),
     defaultValues: {
@@ -51,13 +51,32 @@ const MuscleGroupForm = ({
     },
   });
 
-  const handleSubmit = async (values: MuscleGroupFormValues) => {
-    const token = await getToken();
-    if (!token) return;
-    await apiService.put(`/admin/muscle-group/${values.id}`, values, token);
-    toast.success("Grupo muscular actualizado correctamente");
-    setOpenModal(false);
-  };
+  const { mutate: updateMuscleGroup, isPending } = useMutation({
+    mutationFn: async (values: MuscleGroupFormValues) => {
+      const token = await getToken();
+      if (!token) return;
+      await apiService.put(`/admin/muscle-group/${values.id}`, values, token);
+    },
+    onMutate: async (values) => {
+      await queryClient.cancelQueries({ queryKey: ["groups"] });
+      const prevGroups = queryClient.getQueryData<MuscleGroup[]>(["groups"]);
+      queryClient.setQueryData(["groups"], (old: MuscleGroup[]) =>
+        old.map((group) =>
+          group.id === values.id ? { ...group, name: values.name } : group
+        )
+      );
+      toast.success("Grupo muscular actualizado correctamente");
+      setOpenModal(false);
+      return { prevGroups };
+    },
+    onSuccess: (data, values) => {
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["exercises"] });
+    },
+    onError: () => {
+      toast.error("Error al actualizar el grupo muscular");
+    },
+  });
 
   return (
     <Dialog open={openModal} onOpenChange={setOpenModal}>
@@ -67,7 +86,13 @@ const MuscleGroupForm = ({
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              form.handleSubmit((data) => {
+                updateMuscleGroup(data);
+              })(e);
+            }}
             className="space-y-4"
           >
             <FormField
@@ -84,7 +109,9 @@ const MuscleGroupForm = ({
               )}
             />
             <DialogFooter>
-              <Button type="submit">Guardar</Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Guardando..." : "Guardar"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

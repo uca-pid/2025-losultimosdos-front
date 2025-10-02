@@ -1,7 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown, Plus, TrashIcon } from "lucide-react";
+import {
+  Check,
+  ChevronsUpDown,
+  PencilIcon,
+  Plus,
+  TrashIcon,
+} from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
@@ -31,6 +37,8 @@ import {
   ContextMenuTrigger,
 } from "./ui/context-menu";
 import { useRouter } from "next/navigation";
+import MuscleGroupForm from "./forms/muscle-group";
+import { MuscleGroup } from "@/types";
 
 interface Option {
   value: string;
@@ -48,7 +56,7 @@ interface CreatableComboboxProps {
 }
 
 export function CreatableCombobox({
-  options: initialOptions,
+  options,
   value,
   onValueChange,
   placeholder = "Seleccionar opción...",
@@ -57,11 +65,14 @@ export function CreatableCombobox({
   isLoading = false,
 }: CreatableComboboxProps) {
   const [open, setOpen] = React.useState(false);
-  const [options, setOptions] = React.useState<Option[]>(initialOptions);
   const { getToken } = useAuth();
+
   const [searchValue, setSearchValue] = React.useState("");
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [selectedMuscleGroup, setSelectedMuscleGroup] =
+    React.useState<MuscleGroup | null>(null);
+
   const filteredOptions = options.filter((option) =>
     option.label.toLowerCase().includes(searchValue.toLowerCase())
   );
@@ -77,9 +88,9 @@ export function CreatableCombobox({
       token
     );
     const muscleGroup = response.muscleGroup;
-    setOptions([
-      ...options,
-      { value: muscleGroup.id.toString(), label: muscleGroup.name },
+    queryClient.setQueryData(["groups"], (old: MuscleGroup[]) => [
+      ...old,
+      muscleGroup,
     ]);
     queryClient.invalidateQueries({ queryKey: ["groups"] });
     onValueChange?.(muscleGroup.id.toString());
@@ -92,7 +103,9 @@ export function CreatableCombobox({
     const token = await getToken();
     if (!token) return;
     await apiService.delete(`/admin/muscle-group/${value}`, token);
-    setOptions(options.filter((option) => option.value !== value));
+    queryClient.setQueryData(["groups"], (old: MuscleGroup[]) =>
+      old.filter((option) => option.id !== Number(value))
+    );
     queryClient.invalidateQueries({ queryKey: ["groups"] });
     queryClient.invalidateQueries({ queryKey: ["exercises"] });
     onValueChange?.(
@@ -163,18 +176,40 @@ export function CreatableCombobox({
                       {option.label}
                     </CommandItem>
                   </ContextMenuTrigger>
-                  <ContextMenuContent>
-                    <ContextMenuItem onClick={() => onDelete(option.value)}>
-                      <TrashIcon className="h-4 w-4" />
-                      Eliminar
-                    </ContextMenuItem>
-                  </ContextMenuContent>
+                  {option.label !== "Generico" && (
+                    <ContextMenuContent>
+                      <ContextMenuItem onClick={() => onDelete(option.value)}>
+                        <TrashIcon className="h-4 w-4" />
+                        Eliminar
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onClick={() =>
+                          setSelectedMuscleGroup({
+                            id: Number(option.value),
+                            name: option.label,
+                          })
+                        }
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                        Editar
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  )}
                 </ContextMenu>
               ))}
             </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>
+      {selectedMuscleGroup && (
+        <MuscleGroupForm
+          values={selectedMuscleGroup || { id: 0, name: "" }}
+          openModal={selectedMuscleGroup !== null}
+          setOpenModal={(open) =>
+            setSelectedMuscleGroup(open ? selectedMuscleGroup : null)
+          }
+        />
+      )}
     </Popover>
   );
 }
