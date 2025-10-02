@@ -27,6 +27,7 @@ export interface Routine {
   level: "Beginner" | "Intermediate" | "Advanced";
   duration: number;
   icon: string;
+  users: string[];
 }
 
 export interface MuscleGroup {

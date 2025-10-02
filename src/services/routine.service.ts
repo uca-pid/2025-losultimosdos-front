@@ -5,7 +5,7 @@ class RoutineService {
   private readonly apiService = apiService;
   async getAllRoutines() {
     const data = await this.apiService.get("/routines");
-    return data.items as Routine[];
+    return data.items as (Routine & { exercises: RoutineExercise[] })[];
   }
 
   async createRoutine(
@@ -63,6 +63,32 @@ class RoutineService {
     await this.apiService.put(
       `/admin/routines/${id}`,
       { ...routine, exercises: transformedExercises },
+      token
+    );
+  }
+
+  async assignRoutine(userId: string, routineId: number, token: string | null) {
+    if (!token) {
+      throw new Error("No authentication token available");
+    }
+    await this.apiService.post(
+      `/admin/routines/${routineId}/assign`,
+      { userId },
+      token
+    );
+  }
+
+  async unassignRoutine(
+    userId: string,
+    routineId: number,
+    token: string | null
+  ) {
+    if (!token) {
+      throw new Error("No authentication token available");
+    }
+    await this.apiService.post(
+      `/admin/routines/${routineId}/unassign`,
+      { userId },
       token
     );
   }

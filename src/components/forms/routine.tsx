@@ -35,7 +35,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-const ICON_OPTIONS: { value: string; label: string; Icon: LucideIcon }[] = [
+export const ICON_OPTIONS: {
+  value: string;
+  label: string;
+  Icon: LucideIcon;
+}[] = [
   { value: "activity", label: "Actividad / General", Icon: Activity },
   { value: "dumbbell", label: "Fuerza", Icon: Dumbbell },
   { value: "flame", label: "Cardio", Icon: Flame },

@@ -7,7 +7,7 @@ import { ICONS } from "@/components/forms/routine"; // el mapping de arriba
 const columns: ColumnDef<Routine>[] = [
   {
     accessorKey: "icon",
-    header: "Icono",
+    header: "",
     cell: ({ row }) => {
       const name = row.original.icon as string;
       const IconCmp = ICONS[name];

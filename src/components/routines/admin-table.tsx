@@ -25,7 +25,6 @@ import {
   Heart,
   type LucideIcon,
 } from "lucide-react";
-import { SheetTrigger } from "../ui/sheet";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "react-hot-toast";
