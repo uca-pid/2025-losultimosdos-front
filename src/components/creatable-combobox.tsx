@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import { Check, ChevronsUpDown, Plus, TrashIcon } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Skeleton } from "./ui/skeleton";
+import toast from "react-hot-toast";
+import apiService from "@/services/api.service";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from "./ui/context-menu";
+import { useRouter } from "next/navigation";
 
 interface Option {
   value: string;
@@ -28,45 +41,69 @@ interface CreatableComboboxProps {
   options: Option[];
   value?: string;
   onValueChange?: (value: string) => void;
-  onCreate?: (value: string) => void;
   placeholder?: string;
   emptyText?: string;
   createText?: string;
+  isLoading?: boolean;
 }
 
 export function CreatableCombobox({
   options: initialOptions,
   value,
   onValueChange,
-  onCreate,
-  placeholder = "Select option...",
-  emptyText = "No option found.",
-  createText = "Create",
+  placeholder = "Seleccionar opción...",
+  emptyText = "No se encontraron opciones.",
+  createText = "Crear",
+  isLoading = false,
 }: CreatableComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [options, setOptions] = React.useState<Option[]>(initialOptions);
+  const { getToken } = useAuth();
   const [searchValue, setSearchValue] = React.useState("");
-
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const filteredOptions = options.filter((option) =>
     option.label.toLowerCase().includes(searchValue.toLowerCase())
   );
 
-  const handleCreate = () => {
-    if (!searchValue.trim()) return;
+  const selectedOption = options.find((option) => option.value === value);
 
-    const newOption: Option = {
-      value: searchValue.toLowerCase().replace(/\s+/g, "-"),
-      label: searchValue,
-    };
-
-    setOptions([...options, newOption]);
-    onValueChange?.(newOption.value);
-    onCreate?.(newOption.value);
+  const onCreate = async (values: { name: string }) => {
+    const token = await getToken();
+    if (!token) return;
+    const response = await apiService.post(
+      "/admin/muscle-group",
+      values,
+      token
+    );
+    const muscleGroup = response.muscleGroup;
+    setOptions([
+      ...options,
+      { value: muscleGroup.id.toString(), label: muscleGroup.name },
+    ]);
+    queryClient.invalidateQueries({ queryKey: ["groups"] });
+    onValueChange?.(muscleGroup.id.toString());
+    router.refresh();
+    toast.success("Grupo muscular creado correctamente");
     setSearchValue("");
-    setOpen(false);
   };
 
-  const selectedOption = options.find((option) => option.value === value);
+  const onDelete = async (value: string) => {
+    const token = await getToken();
+    if (!token) return;
+    await apiService.delete(`/admin/muscle-group/${value}`, token);
+    setOptions(options.filter((option) => option.value !== value));
+    queryClient.invalidateQueries({ queryKey: ["groups"] });
+    queryClient.invalidateQueries({ queryKey: ["exercises"] });
+    onValueChange?.(
+      options.find((option) => option.label === "Generico")?.value ?? ""
+    );
+    toast.success("Grupo muscular eliminado correctamente");
+  };
+
+  if (isLoading) {
+    return <Skeleton className="w-full h-10" />;
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -84,41 +121,55 @@ export function CreatableCombobox({
       <PopoverContent className="w-full p-0" align="start">
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder="Search or create..."
+            placeholder="Buscar o crear..."
             value={searchValue}
             onValueChange={setSearchValue}
           />
           <CommandList>
             <CommandEmpty>
-              <div className="flex flex-col items-center gap-2 py-6">
-                <p className="text-sm text-muted-foreground">{emptyText}</p>
-                {searchValue && (
-                  <Button size="sm" onClick={handleCreate} className="gap-1">
-                    <Plus className="h-4 w-4" />
-                    {createText} "{searchValue}"
-                  </Button>
-                )}
-              </div>
+              {searchValue && (
+                <Button
+                  size="sm"
+                  onClick={() => onCreate({ name: searchValue })}
+                  className=""
+                >
+                  <Plus className="h-4 w-4" />
+                  Crear "{searchValue}"
+                </Button>
+              )}
             </CommandEmpty>
             <CommandGroup>
               {filteredOptions.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  onSelect={(currentValue) => {
-                    onValueChange?.(currentValue === value ? "" : currentValue);
-                    setOpen(false);
-                    setSearchValue("");
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === option.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
+                <ContextMenu key={option.value}>
+                  <ContextMenuTrigger asChild>
+                    <CommandItem
+                      value={option.value.toString()}
+                      onSelect={(currentValue) => {
+                        onValueChange?.(
+                          currentValue === value ? "" : currentValue
+                        );
+                        setOpen(false);
+                        setSearchValue("");
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          value === option.value.toString()
+                            ? "opacity-100"
+                            : "opacity-0"
+                        )}
+                      />
+                      {option.label}
+                    </CommandItem>
+                  </ContextMenuTrigger>
+                  <ContextMenuContent>
+                    <ContextMenuItem onClick={() => onDelete(option.value)}>
+                      <TrashIcon className="h-4 w-4" />
+                      Eliminar
+                    </ContextMenuItem>
+                  </ContextMenuContent>
+                </ContextMenu>
               ))}
             </CommandGroup>
           </CommandList>

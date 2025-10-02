@@ -28,6 +28,7 @@ import { ExerciseForm } from "@/components/forms/exercise";
 import type { ExerciseFormValues } from "@/components/forms/exercise";
 import { type Exercise } from "@/types";
 import { columns as baseColumns } from "@/components/exercises/columns";
+import { useQueryClient } from "@tanstack/react-query";
 
 const useIsMobile = (query = "(max-width: 640px)") => {
   const [isMobile, setIsMobile] = useState(false);
@@ -48,13 +49,15 @@ interface AdminTableProps {
 }
 
 const AdminTable = ({ exercises }: AdminTableProps) => {
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
+    null
+  );
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const isMobile = useIsMobile();
   const { getToken } = useAuth();
   const router = useRouter();
-
+  const queryClient = useQueryClient();
   const onDelete = async (id: number) => {
     try {
       setDeletingId(id);
@@ -83,8 +86,7 @@ const AdminTable = ({ exercises }: AdminTableProps) => {
       token
     );
 
-    toast.success("Ejercicio actualizado correctamente");
-    router.refresh();
+    queryClient.invalidateQueries({ queryKey: ["exercises"] });
     setSelectedExercise(null);
   };
 
@@ -177,7 +179,9 @@ const AdminTable = ({ exercises }: AdminTableProps) => {
                         Ver video
                       </a>
                     ) : (
-                      <span className="text-gray-900 dark:text-gray-100">-</span>
+                      <span className="text-gray-900 dark:text-gray-100">
+                        -
+                      </span>
                     )}
                   </div>
                 </div>
@@ -192,7 +196,9 @@ const AdminTable = ({ exercises }: AdminTableProps) => {
         className={isMobile ? "h-[90vh] w-full p-4" : "sm:w-[540px]"}
       >
         <SheetHeader>
-          <SheetTitle className="text-2xl font-bold">Editar Ejercicio</SheetTitle>
+          <SheetTitle className="text-2xl font-bold">
+            Editar Ejercicio
+          </SheetTitle>
         </SheetHeader>
         {selectedExercise && (
           <div className="mt-4">

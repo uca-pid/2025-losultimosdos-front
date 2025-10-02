@@ -42,7 +42,6 @@ const MuscleGroupForm = ({
   openModal: boolean;
   setOpenModal: (open: boolean) => void;
 }) => {
-  console.log(values);
   const { getToken } = useAuth();
   const form = useForm<MuscleGroupFormValues>({
     resolver: zodResolver(muscleGroupFormSchema),

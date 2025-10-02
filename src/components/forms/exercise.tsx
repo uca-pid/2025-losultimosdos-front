@@ -28,7 +28,7 @@ import {
 import { toast } from "react-hot-toast";
 import apiService, { ApiValidationError } from "@/services/api.service";
 import { useAuth } from "@clerk/nextjs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CreatableCombobox } from "../creatable-combobox";
 import {
   DropdownMenu,
@@ -45,6 +45,7 @@ import {
   DialogFooter,
 } from "../ui/dialog";
 import MuscleGroupForm from "./muscle-group";
+import { Skeleton } from "../ui/skeleton";
 
 type MuscleGroup = { id: number; name: string };
 
@@ -76,7 +77,7 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
   const { getToken } = useAuth();
   const [openModal, setOpenModal] = useState(false);
   const [values, setValues] = useState<MuscleGroup | null>(null);
-
+  const queryClient = useQueryClient();
   const { data: groups, isLoading: groupsLoading } = useQuery({
     queryKey: ["groups"],
     queryFn: async () => {
@@ -104,6 +105,7 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
     try {
       await onSubmit(values);
       toast.success(isEdit ? "Ejercicio actualizado" : "Ejercicio creado");
+      queryClient.invalidateQueries({ queryKey: ["exercises"] });
       if (!isEdit) form.reset();
     } catch (error: any) {
       if (error instanceof ApiValidationError && error.details?.length) {
@@ -160,59 +162,20 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
               <FormItem>
                 <FormLabel>Grupo muscular</FormLabel>
                 <FormControl>
-                  <Select
-                    value={field.value !== undefined ? String(field.value) : ""}
-                    onValueChange={(val) => field.onChange(Number(val))}
-                    disabled={groupsLoading || groups?.length === 0}
-                  >
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          groupsLoading
-                            ? "Cargando grupos..."
-                            : groups?.length
-                            ? "Seleccioná un grupo"
-                            : "Sin grupos disponibles"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent className="w-full">
-                      {groups?.map((g) => (
-                        <div
-                          key={g.id}
-                          className="flex items-center justify-between"
-                        >
-                          <SelectItem value={String(g.id)}>{g.name}</SelectItem>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="rounded-full"
-                              >
-                                <EllipsisIcon className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setOpenModal(true);
-                                  setValues(g);
-                                }}
-                              >
-                                <PencilIcon className="mr-2 h-4 w-4" />
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <DeleteIcon className="mr-2 h-4 w-4" />
-                                Eliminar
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {groupsLoading ? (
+                    <Skeleton className="w-full h-10" />
+                  ) : (
+                    <CreatableCombobox
+                      options={
+                        groups?.map((group) => ({
+                          value: group.id.toString(),
+                          label: group.name,
+                        })) || []
+                      }
+                      onValueChange={(val) => field.onChange(Number(val))}
+                      value={field.value?.toString() ?? ""}
+                    />
+                  )}
                 </FormControl>
                 <FormMessage />
               </FormItem>

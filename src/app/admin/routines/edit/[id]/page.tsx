@@ -67,6 +67,7 @@ const EditRoutinePage = () => {
           level: values.level,
           duration: values.duration,
           icon: values.icon,
+          users: [],
         },
         values.exercises.map((exercise) => ({
           id: exercise.exerciseData.id,

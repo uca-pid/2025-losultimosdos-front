@@ -12,6 +12,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "../ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Check, ChevronsUpDown, X } from "lucide-react";
@@ -93,27 +94,31 @@ export const RoutineExercises = ({
         <PopoverContent className="w-full p-0">
           <Command>
             <CommandInput placeholder="Buscar ejercicio..." />
-            <CommandEmpty>No se encontraron ejercicios.</CommandEmpty>
-            <CommandGroup>
-              {exercises.map((exercise) => (
-                <CommandItem
-                  key={exercise.id}
-                  onSelect={() => handleAddExercise(exercise)}
-                  className="cursor-pointer"
-                  disabled={value.some((e) => e.exerciseId === exercise.id)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value.some((e) => e.exerciseId === exercise.id)
-                        ? "opacity-100"
-                        : "opacity-0"
-                    )}
-                  />
-                  {exercise.name}
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            <CommandList>
+              <CommandGroup>
+                <CommandEmpty className="flex items-center justify-center">
+                  No se encontraron ejercicios.
+                </CommandEmpty>
+                {exercises.map((exercise) => (
+                  <CommandItem
+                    key={exercise.id}
+                    onSelect={() => handleAddExercise(exercise)}
+                    className="cursor-pointer"
+                    disabled={value.some((e) => e.exerciseId === exercise.id)}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value.some((e) => e.exerciseId === exercise.id)
+                          ? "opacity-100"
+                          : "opacity-0"
+                      )}
+                    />
+                    {exercise.name}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
           </Command>
         </PopoverContent>
       </Popover>
