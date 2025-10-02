@@ -23,7 +23,7 @@ import {
   CardAction,
 } from "@/components/ui/card";
 
-import apiService from "@/services/api.service";
+import apiService, { ApiValidationError } from "@/services/api.service";
 import { ExerciseForm } from "@/components/forms/exercise";
 import type { ExerciseFormValues } from "@/components/forms/exercise";
 import { type Exercise } from "@/types";
@@ -66,6 +66,16 @@ const AdminTable = ({ exercises }: AdminTableProps) => {
       await apiService.delete(`/admin/exercises/${id}`, token);
       router.refresh();
       toast.success("Ejercicio eliminado correctamente");
+    } catch (error) {
+      if (error instanceof ApiValidationError) {
+        if (error.status === 409) {
+          toast.error(
+            "El ejercicio no puede ser eliminado porque está asignado a una rutina"
+          );
+        }
+      } else {
+        toast.error("Error eliminando el ejercicio");
+      }
     } finally {
       setDeletingId(null);
     }
