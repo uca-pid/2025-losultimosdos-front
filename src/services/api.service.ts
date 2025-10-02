@@ -27,6 +27,7 @@ export class ApiService {
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + token,
+        "ngrok-skip-browser-warning": "1",
       },
     });
     if (response.status >= 500) {
@@ -46,6 +47,7 @@ export class ApiService {
       method: "GET",
       headers: {
         Authorization: token ? "Bearer " + token : "",
+        "ngrok-skip-browser-warning": "1",
       },
     });
     if (response.status >= 500) {
@@ -68,6 +70,7 @@ export class ApiService {
     const headers = {
       "Content-Type": "application/json",
       Authorization: "Bearer " + token,
+      "ngrok-skip-browser-warning": "1",
       ...additionalHeaders,
     };
 
@@ -90,6 +93,7 @@ export class ApiService {
     const headers = {
       "Content-Type": "application/json",
       Authorization: "Bearer " + token,
+      "ngrok-skip-browser-warning": "1",
     };
     const response = await fetch(this.baseUrl + endpoint, {
       method: "DELETE",
