@@ -30,6 +30,21 @@ import apiService, { ApiValidationError } from "@/services/api.service";
 import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { CreatableCombobox } from "../creatable-combobox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { DeleteIcon, EllipsisIcon, PencilIcon } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../ui/dialog";
+import MuscleGroupForm from "./muscle-group";
 
 type MuscleGroup = { id: number; name: string };
 
@@ -59,6 +74,8 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { getToken } = useAuth();
+  const [openModal, setOpenModal] = useState(false);
+  const [values, setValues] = useState<MuscleGroup | null>(null);
 
   const { data: groups, isLoading: groupsLoading } = useQuery({
     queryKey: ["groups"],
@@ -159,11 +176,40 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
                         }
                       />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="w-full">
                       {groups?.map((g) => (
-                        <SelectItem key={g.id} value={String(g.id)}>
-                          {g.name}
-                        </SelectItem>
+                        <div
+                          key={g.id}
+                          className="flex items-center justify-between"
+                        >
+                          <SelectItem value={String(g.id)}>{g.name}</SelectItem>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-full"
+                              >
+                                <EllipsisIcon className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setOpenModal(true);
+                                  setValues(g);
+                                }}
+                              >
+                                <PencilIcon className="mr-2 h-4 w-4" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <DeleteIcon className="mr-2 h-4 w-4" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       ))}
                     </SelectContent>
                   </Select>
@@ -214,6 +260,11 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
           </Button>
         </form>
       </Form>
+      <MuscleGroupForm
+        values={values || { id: 0, name: "" }}
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+      />
     </Card>
   );
 };

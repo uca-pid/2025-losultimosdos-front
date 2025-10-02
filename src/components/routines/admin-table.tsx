@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { type ColumnDef } from "@tanstack/react-table";
+import { useMutation } from "@tanstack/react-query";
 
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -24,6 +25,11 @@ import {
   Heart,
   type LucideIcon,
 } from "lucide-react";
+import { SheetTrigger } from "../ui/sheet";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import { toast } from "react-hot-toast";
+import routineService from "@/services/routine.service";
 
 const ICONS: Record<string, LucideIcon> = {
   activity: Activity,
@@ -33,38 +39,76 @@ const ICONS: Record<string, LucideIcon> = {
   heart: Heart,
 };
 
-const useIsMobile = (query = "(max-width: 640px)") => {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const mql = window.matchMedia(query);
-    const onChange = (e: MediaQueryListEvent | MediaQueryList) =>
-      setIsMobile("matches" in e ? e.matches : (e as MediaQueryList).matches);
-
-    onChange(mql);
-    mql.addEventListener?.("change", onChange as any);
-    return () => mql.removeEventListener?.("change", onChange as any);
-  }, [query]);
-  return isMobile;
-};
-
 interface AdminRoutineTableProps {
   routines: Routine[];
-  extraColumns?: ColumnDef<Routine>[];
 }
 
 const AdminRoutineTable = ({
-  routines,
-  extraColumns = [],
+  routines: initialRoutines,
 }: AdminRoutineTableProps) => {
-  const isMobile = useIsMobile();
+  const [routines, setRoutines] = useState<Routine[]>(initialRoutines);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const { getToken } = useAuth();
+  const router = useRouter();
 
-  const tableColumns: ColumnDef<Routine>[] =
-    extraColumns.length > 0 ? [...baseColumns, ...extraColumns] : baseColumns;
+  const { mutate: deleteRoutine, isPending: isDeleting } = useMutation({
+    mutationFn: async (id: number) => {
+      const token = await getToken();
+      setDeletingId(id);
+      await routineService.deleteRoutine(id, token);
+    },
+    onMutate: async (deletedId) => {
+      // Optimistically remove the routine from the UI
+      setRoutines((current) =>
+        current.filter((routine) => routine.id !== deletedId)
+      );
+      setDeletingId(null);
+      toast.success("Rutina eliminada correctamente");
+    },
+    onSuccess: () => {
+      setDeletingId(null);
+      router.refresh();
+    },
+    onError: (error) => {
+      // Revert the optimistic update on error
+      setDeletingId(null);
+      setRoutines(initialRoutines);
+      toast.error("Error al eliminar la rutina");
+      console.error("Error deleting routine:", error);
+    },
+  });
+
+  const extraColumns: ColumnDef<Routine>[] = [
+    {
+      accessorKey: "actions",
+      header: "Acciones",
+      cell: ({ row }) => (
+        <div className="px-4 py-2 flex gap-2 items-center justify-end">
+          <Link href={`/admin/routines/edit/${row.original.id}`}>
+            <Button variant="outline">Editar</Button>
+          </Link>
+          <Button
+            variant="destructive"
+            onClick={() => deleteRoutine(row.original.id as number)}
+            disabled={isDeleting || deletingId === row.original.id}
+            className="cursor-pointer disabled:cursor-not-allowed w-28"
+          >
+            {isDeleting || deletingId === row.original.id
+              ? "Eliminando"
+              : "Eliminar"}
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <>
       <div className="hidden sm:block">
-        <DataTable columns={tableColumns} data={routines} />
+        <DataTable
+          columns={[...baseColumns, ...extraColumns]}
+          data={routines}
+        />
       </div>
 
       <div className="sm:hidden space-y-3">
@@ -79,8 +123,8 @@ const AdminRoutineTable = ({
         ) : (
           routines.map((rt) => (
             <Card key={rt.id} className="overflow-hidden">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
+              <CardHeader className="pb-2 items-center">
+                <CardTitle className="text-base flex  gap-2 ">
                   {(() => {
                     const key = (rt.icon ?? "").toString().toLowerCase();
                     const IconCmp = ICONS[key as keyof typeof ICONS];
@@ -98,8 +142,11 @@ const AdminRoutineTable = ({
                     variant="outline"
                     className="w-full"
                   >
-                    <Link href={`/admin/routines/${rt.id}`} prefetch={false}>
-                      Ver / Editar
+                    <Link
+                      href={`/admin/routines/edit/${rt.id}`}
+                      prefetch={false}
+                    >
+                      Editar
                     </Link>
                   </Button>
                 </CardAction>

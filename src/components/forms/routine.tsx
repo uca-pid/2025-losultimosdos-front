@@ -5,12 +5,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "../ui/button";
-import { Card } from "../ui/card";
 import { Input } from "../ui/input";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -53,11 +51,6 @@ export const ICONS: Record<string, LucideIcon> = {
   heart: Heart,
 };
 
-interface RoutineExerciseWithData
-  extends Omit<RoutineExercise, "id" | "routineId"> {
-  exerciseData: Exercise;
-}
-
 const routineExerciseSchema = z.object({
   exerciseId: z.number(),
   sets: z.number().min(1, "Debe tener al menos 1 serie").optional(),
@@ -76,7 +69,7 @@ const routineExerciseSchema = z.object({
   }),
 });
 
-const routineFormSchema = z.object({
+export const routineFormSchema = z.object({
   id: z.number().optional(),
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
   description: z
@@ -94,19 +87,21 @@ const routineFormSchema = z.object({
     .array(routineExerciseSchema)
     .min(1, "La rutina debe tener al menos un ejercicio"),
 });
-type RoutineFormValues = z.infer<typeof routineFormSchema>;
+export type RoutineFormValues = z.infer<typeof routineFormSchema>;
 interface RoutineFormProps {
   onSubmit: (values: RoutineFormValues) => Promise<void>;
-  isLoading?: boolean;
   defaultValues?: RoutineFormValues;
   isEdit?: boolean;
+  isEditing?: boolean;
 }
 
 export const RoutineForm = ({
   onSubmit,
   defaultValues,
   isEdit = false,
+  isEditing = false,
 }: RoutineFormProps) => {
+  console.log("defaultValues", defaultValues);
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm<RoutineFormValues>({
     resolver: zodResolver(routineFormSchema),
@@ -123,8 +118,9 @@ export const RoutineForm = ({
     setIsLoading(true);
     try {
       await onSubmit(values);
-      toast.success("Rutina guardada con éxito");
-      form.reset();
+      if (!isEdit) {
+        form.reset();
+      }
     } catch (error) {
       if (error instanceof ApiValidationError) {
         error.details.forEach((detail) => {
@@ -170,29 +166,67 @@ export const RoutineForm = ({
               </FormItem>
             )}
           />
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="level"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nivel</FormLabel>
-                  <FormControl>
-                    <Select {...field}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un nivel" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Beginner">Principiante</SelectItem>
-                        <SelectItem value="Intermediate">Intermedio</SelectItem>
-                        <SelectItem value="Advanced">Avanzado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <div className="flex flex-col gap-4 lg:flex-row">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="level"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nivel</FormLabel>
+                    <FormControl>
+                      <Select {...field}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un nivel" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Beginner">Principiante</SelectItem>
+                          <SelectItem value="Intermediate">
+                            Intermedio
+                          </SelectItem>
+                          <SelectItem value="Advanced">Avanzado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="icon"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Icono</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Elegí un icono" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {ICON_OPTIONS.map(({ value, label, Icon }) => (
+                            <SelectItem key={value} value={value}>
+                              <div className="flex items-center gap-2">
+                                <Icon className="h-4 w-4" />
+                                <span>{label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+            </div>
+
             <FormField
               control={form.control}
               name="duration"
@@ -212,49 +246,6 @@ export const RoutineForm = ({
               )}
             />
           </div>
-          <FormField
-            control={form.control}
-            name="icon"
-            render={({ field }) => {
-              const Selected =
-                ICON_OPTIONS.find((o) => o.value === field.value)?.Icon || null;
-
-              return (
-                <FormItem>
-                  <FormLabel>Icono</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Elegí un icono" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {ICON_OPTIONS.map(({ value, label, Icon }) => (
-                        <SelectItem key={value} value={value}>
-                          <div className="flex items-center gap-2">
-                            <Icon className="h-4 w-4" />
-                            <span>{label}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {Selected && (
-                    <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
-                      <Selected className="h-4 w-4" />
-                      <span>Vista previa</span>
-                    </div>
-                  )}
-
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
 
           <FormField
             control={form.control}
@@ -272,8 +263,8 @@ export const RoutineForm = ({
               </FormItem>
             )}
           />
-          <Button type="submit" disabled={isLoading}>
-            {isLoading
+          <Button type="submit" disabled={isLoading || isEditing}>
+            {isLoading || isEditing
               ? "Guardando..."
               : isEdit
               ? "Guardar Cambios"
