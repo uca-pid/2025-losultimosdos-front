@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { ModeToggle } from "@/components/mode-toggle";
+import { PageBreadcrumb } from "@/components/page-breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import {
   SidebarInset,
@@ -21,12 +22,17 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-4 w-full">
-            <SidebarTrigger className="-ml-1" />
+        <header className="flex flex-col shrink-0 transition-[width,height] ease-linear">
+          <div className="flex h-16 items-center gap-2 group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+            <div className="flex items-center gap-2 px-4 w-full">
+              <SidebarTrigger className="-ml-1" />
+            </div>
+            <div className="flex items-center gap-2 px-4">
+              <ModeToggle />
+            </div>
           </div>
-          <div className="flex items-center gap-2 px-4">
-            <ModeToggle />
+          <div className="px-4 py-2">
+            <PageBreadcrumb />
           </div>
         </header>
         <main className="container mx-auto space-y-4 p-4">{children}</main>
