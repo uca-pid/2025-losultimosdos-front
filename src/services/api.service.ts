@@ -42,6 +42,7 @@ export class ApiService {
   }
 
   async get(endpoint: string, token?: string) {
+
     const response = await fetch(this.baseUrl + endpoint, {
       method: "GET",
       headers: {
