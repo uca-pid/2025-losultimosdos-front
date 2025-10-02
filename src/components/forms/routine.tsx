@@ -40,11 +40,11 @@ export const ICON_OPTIONS: {
   label: string;
   Icon: LucideIcon;
 }[] = [
-  { value: "activity", label: "Actividad / General", Icon: Activity },
+  { value: "activity", label: "Actividad", Icon: Activity },
   { value: "dumbbell", label: "Fuerza", Icon: Dumbbell },
   { value: "flame", label: "Cardio", Icon: Flame },
-  { value: "timer", label: "HIIT / Intervalos", Icon: Timer },
-  { value: "heart", label: "Salud / Bienestar", Icon: Heart },
+  { value: "timer", label: "HIIT", Icon: Timer },
+  { value: "heart", label: "Salud", Icon: Heart },
 ];
 
 export const ICONS: Record<string, LucideIcon> = {
@@ -170,7 +170,7 @@ export const RoutineForm = ({
               </FormItem>
             )}
           />
-          <div className="flex flex-col gap-4 lg:flex-row">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-start">
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
