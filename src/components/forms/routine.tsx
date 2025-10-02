@@ -17,9 +17,40 @@ import {
   FormMessage,
 } from "../ui/form";
 import { toast } from "react-hot-toast";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ApiValidationError } from "@/services/api.service";
+import { RoutineExercises } from "../routines/routine-exercises";
+import { Exercise, RoutineExercise } from "@/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
+interface RoutineExerciseWithData
+  extends Omit<RoutineExercise, "id" | "routineId"> {
+  exerciseData: Exercise;
+}
+
+const routineExerciseSchema = z.object({
+  exerciseId: z.number(),
+  sets: z.number().min(1, "Debe tener al menos 1 serie").optional(),
+  reps: z.number().min(1, "Debe tener al menos 1 repetición").optional(),
+  restTime: z.number().min(0, "El descanso no puede ser negativo").optional(),
+  exerciseData: z.object({
+    id: z.number(),
+    name: z.string(),
+    equipment: z.string().nullable().optional(),
+    videoUrl: z.string().nullable().optional(),
+    muscleGroupId: z.number(),
+    muscleGroup: z.object({
+      id: z.number(),
+      name: z.string(),
+    }),
+  }),
+});
 
 const routineFormSchema = z.object({
   id: z.number().optional(),
@@ -30,12 +61,14 @@ const routineFormSchema = z.object({
   level: z.enum(["Beginner", "Intermediate", "Advanced"], {
     message: "Nivel inválido",
   }),
-
-  durationWeeks: z
+  duration: z
     .number()
     .min(1, "La duracion debe ser al menos 1 semana")
     .max(52, "La duracion no puede ser mayor a 52 semanas"),
   icon: z.string().url("Debe ser una URL válida"),
+  exercises: z
+    .array(routineExerciseSchema)
+    .min(1, "La rutina debe tener al menos un ejercicio"),
 });
 type RoutineFormValues = z.infer<typeof routineFormSchema>;
 interface RoutineFormProps {
@@ -57,8 +90,9 @@ export const RoutineForm = ({
       name: "",
       description: "",
       level: "Beginner",
-      durationWeeks: 4,
+      duration: 4,
       icon: "",
+      exercises: [],
     },
   });
   const handleSubmit = async (values: RoutineFormValues) => {
@@ -79,7 +113,7 @@ export const RoutineForm = ({
   };
 
   return (
-    <Card className="p-6 w-full max-w-lg">
+    <div className="container mx-auto space-y-4 p-4">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
@@ -112,39 +146,48 @@ export const RoutineForm = ({
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="level"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nivel</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    className="w-full px-3 py-2 border rounded-md"
-                  >
-                    <option value="Beginner">Principiante</option>
-                    <option value="Intermediate">Intermedio</option>
-                    <option value="Advanced">Avanzado</option>
-                  </select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="durationWeeks"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Duración (semanas)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="4" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="level"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nivel</FormLabel>
+                  <FormControl>
+                    <Select {...field}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un nivel" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Beginner">Principiante</SelectItem>
+                        <SelectItem value="Intermediate">Intermedio</SelectItem>
+                        <SelectItem value="Advanced">Avanzado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="duration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Duración (semanas)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="4"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <FormField
             control={form.control}
             name="icon"
@@ -161,6 +204,22 @@ export const RoutineForm = ({
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="exercises"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ejercicios</FormLabel>
+                <FormControl>
+                  <RoutineExercises
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <Button type="submit" disabled={isLoading}>
             {isLoading
               ? "Guardando..."
@@ -170,6 +229,6 @@ export const RoutineForm = ({
           </Button>
         </form>
       </Form>
-    </Card>
+    </div>
   );
 };

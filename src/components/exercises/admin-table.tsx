@@ -18,6 +18,7 @@ import apiService from "@/services/api.service";
 import { Button } from "../ui/button";
 import { ExerciseForm } from "../forms/exercise";
 import type { ExerciseFormValues } from "../forms/exercise";
+import { toast } from "react-hot-toast";
 
 interface AdminTableProps {
   exercises: Exercise[];
@@ -37,10 +38,10 @@ const AdminTable = ({ exercises }: AdminTableProps) => {
     if (!token) return;
     await apiService.delete(`/admin/exercises/${id}`, token);
     router.refresh();
+    toast.success("Ejercicio eliminado correctamente");
     setDeletingId(null);
   };
 
-  // ⬇️ ahora el handler espera el payload del form
   const onEdit = async (values: ExerciseFormValues) => {
     const token = await getToken();
     if (!token || !values.id) return;
@@ -56,6 +57,7 @@ const AdminTable = ({ exercises }: AdminTableProps) => {
       token
     );
 
+    toast.success("Ejercicio actualizado correctamente");
     router.refresh();
     setSelectedExercise(null);
   };

@@ -29,6 +29,7 @@ import { toast } from "react-hot-toast";
 import apiService, { ApiValidationError } from "@/services/api.service";
 import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
+import { CreatableCombobox } from "../creatable-combobox";
 
 type MuscleGroup = { id: number; name: string };
 

@@ -25,7 +25,7 @@ export interface Routine {
   name: string;
   description: string;
   level: "Beginner" | "Intermediate" | "Advanced";
-  durationWeeks: number;
+  duration: number;
   icon: string;
 }
 
@@ -35,9 +35,18 @@ export interface MuscleGroup {
 }
 export interface Exercise {
   id: number;
-  description: string;
   name: string;
-  videoUrl: string;
+  equipment?: string | null;
+  videoUrl?: string | null;
+  muscleGroupId: number;
   muscleGroup: MuscleGroup;
-  equipment: string;
+}
+
+export interface RoutineExercise {
+  id: number;
+  routineId: number;
+  exerciseId: number;
+  sets?: number;
+  reps?: number;
+  restTime?: number; // in seconds
 }
