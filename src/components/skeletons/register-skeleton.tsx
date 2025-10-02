@@ -1,8 +1,8 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function SignInSkeleton() {
+export default function SignUpSkeleton() {
   return (
-    <div className="w-[400px] h-[485px] rounded-xl border bg-card p-6 shadow-sm">
+    <div className="w-[400px] h-[645px] rounded-xl border bg-card p-6 shadow-sm">
       {/* Title */}
       <div className="space-y-2 text-center mb-6">
         <Skeleton className="h-6 w-32 mx-auto" />
@@ -23,9 +23,19 @@ export default function SignInSkeleton() {
         <Skeleton className="h-px w-full" />
       </div>
 
-      {/* Email input */}
-      <div className="space-y-2 mb-6">
-        <Skeleton className="h-4 w-28" />
+      {/* Name + Lastname */}
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <Skeleton className="h-10 w-full rounded-md" />
+        <Skeleton className="h-10 w-full rounded-md" />
+      </div>
+
+      {/* Email */}
+      <div className="mb-4">
+        <Skeleton className="h-10 w-full rounded-md" />
+      </div>
+
+      {/* Password */}
+      <div className="mb-6">
         <Skeleton className="h-10 w-full rounded-md" />
       </div>
 
@@ -34,7 +44,7 @@ export default function SignInSkeleton() {
 
       {/* Footer text */}
       <div className="flex justify-center gap-2">
-        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-28" />
         <Skeleton className="h-4 w-20" />
       </div>
     </div>
