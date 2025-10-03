@@ -10,8 +10,8 @@ export default async function Page() {
   const isAdmin = user?.publicMetadata?.role === "admin";
 
   if (isAdmin) {
-    return redirect("/admin");
+    return redirect("/admin/classes");
   } else {
-    return redirect("/user");
+    return redirect("/user/classes");
   }
 }
