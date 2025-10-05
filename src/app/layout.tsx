@@ -1,3 +1,4 @@
+export const revalidate = 0; // disables static generation for all nested pages
 import { ClerkProvider } from "@/components/clerk-provider";
 import { QueryProvider } from "@/components/query-provider";
 import { ThemeProvider } from "@/components/theme-provider";
