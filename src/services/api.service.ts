@@ -26,7 +26,7 @@ export class ApiService {
       Authorization: "Bearer " + token,
       "ngrok-skip-browser-warning": "1",
     };
-    console.log("[POST Request Headers]", headers);
+
     const response = await fetch(this.baseUrl + endpoint, {
       method: "POST",
       body: JSON.stringify(body),
@@ -52,8 +52,6 @@ export class ApiService {
     const normalizedEndpoint = endpoint.startsWith("/")
       ? endpoint
       : `/${endpoint}`;
-    console.log("[GET Request Headers]", headers);
-    console.log("[GET Request URL]", `${this.baseUrl}${normalizedEndpoint}`);
     const response = await fetch(`${this.baseUrl}${normalizedEndpoint}`, {
       method: "GET",
       headers,
@@ -82,7 +80,6 @@ export class ApiService {
       ...additionalHeaders,
     };
 
-    console.log("[PUT Request Headers]", headers);
     const response = await fetch(this.baseUrl + endpoint, {
       method: "PUT",
       body: JSON.stringify(body),
@@ -104,7 +101,6 @@ export class ApiService {
       Authorization: "Bearer " + token,
       "ngrok-skip-browser-warning": "1",
     };
-    console.log("[DELETE Request Headers]", headers);
     const response = await fetch(this.baseUrl + endpoint, {
       method: "DELETE",
       headers,
