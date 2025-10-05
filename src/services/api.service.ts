@@ -49,8 +49,12 @@ export class ApiService {
       Authorization: token ? "Bearer " + token : "",
       "ngrok-skip-browser-warning": "1",
     };
+    const normalizedEndpoint = endpoint.startsWith("/")
+      ? endpoint
+      : `/${endpoint}`;
     console.log("[GET Request Headers]", headers);
-    const response = await fetch(this.baseUrl + endpoint, {
+    console.log("[GET Request URL]", `${this.baseUrl}${normalizedEndpoint}`);
+    const response = await fetch(`${this.baseUrl}${normalizedEndpoint}`, {
       method: "GET",
       headers,
     });
