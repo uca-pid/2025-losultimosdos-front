@@ -21,14 +21,16 @@ export class ApiService {
     body: Record<string, unknown>,
     token: string
   ): Promise<T> {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+      "ngrok-skip-browser-warning": "1",
+    };
+    console.log("[POST Request Headers]", headers);
     const response = await fetch(this.baseUrl + endpoint, {
       method: "POST",
       body: JSON.stringify(body),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-        "ngrok-skip-browser-warning": "1",
-      },
+      headers,
     });
     if (response.status >= 500) {
       console.log(response.body, response.status);
@@ -43,12 +45,14 @@ export class ApiService {
   }
 
   async get(endpoint: string, token?: string) {
+    const headers = {
+      Authorization: token ? "Bearer " + token : "",
+      "ngrok-skip-browser-warning": "1",
+    };
+    console.log("[GET Request Headers]", headers);
     const response = await fetch(this.baseUrl + endpoint, {
       method: "GET",
-      headers: {
-        Authorization: token ? "Bearer " + token : "",
-        "ngrok-skip-browser-warning": "1",
-      },
+      headers,
     });
     if (response.status >= 500) {
       console.log(response.body, response.status);
@@ -74,10 +78,11 @@ export class ApiService {
       ...additionalHeaders,
     };
 
+    console.log("[PUT Request Headers]", headers);
     const response = await fetch(this.baseUrl + endpoint, {
       method: "PUT",
       body: JSON.stringify(body),
-      headers: headers,
+      headers,
     });
     if (response.status >= 500) {
       console.log(response.body, response.status);
@@ -95,9 +100,10 @@ export class ApiService {
       Authorization: "Bearer " + token,
       "ngrok-skip-browser-warning": "1",
     };
+    console.log("[DELETE Request Headers]", headers);
     const response = await fetch(this.baseUrl + endpoint, {
       method: "DELETE",
-      headers: headers,
+      headers,
     });
     if (response.status >= 500) {
       console.log(response.body, response.status);
