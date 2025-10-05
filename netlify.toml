@@ -1,2 +1,7 @@
 [[plugins]]
 package = "@netlify/plugin-nextjs"
+
+[[headers]]
+for = "/*"
+  [headers.values]
+  Authorization = "*"
