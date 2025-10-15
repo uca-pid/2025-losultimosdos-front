@@ -4,6 +4,7 @@ import {
   IconBook,
   IconUsers,
   IconStretching,
+  IconDashboard,
 } from "@tabler/icons-react";
 import { Dumbbell } from "lucide-react";
 
@@ -21,6 +22,7 @@ import {
 
 import { currentUser } from "@clerk/nextjs/server";
 import { Skeleton } from "./ui/skeleton";
+import { title } from "process";
 
 export async function AppSidebar({
   ...props
@@ -59,6 +61,12 @@ export async function AppSidebar({
         icon: IconAd,
         roles: ["admin"],
       },
+      {
+        title:"Dashboard",
+        url: "/" + user?.publicMetadata?.role + "/dashboard",
+        icon:IconDashboard,
+        roles:["admin"],
+      }
     ],
   };
 
