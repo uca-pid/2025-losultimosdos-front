@@ -32,6 +32,19 @@ class UserService {
     await this.apiService.put(`/admin/users/${userId}/role`, { role }, token);
     return true;
   }
+
+  async updateUserPlan(
+    userId: string,
+    plan: "basic" | "premium",
+    token: string | null
+  ) {
+    if (!token) {
+      throw new Error("No authentication token available");
+    }
+
+    await this.apiService.put(`/admin/users/${userId}/plan`, { plan }, token);
+    return true;
+  }
 }
 
 export default new UserService();

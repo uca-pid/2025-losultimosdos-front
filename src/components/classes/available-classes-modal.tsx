@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { useQueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 import apiService from "@/services/api.service";
 import { GymClass } from "@/types";
@@ -25,7 +24,6 @@ interface AvailableClassesModalProps {
 const AvailableClassesModal = ({ userId }: AvailableClassesModalProps) => {
   const [open, setOpen] = useState(false);
   const { getToken } = useAuth();
-  const queryClient = useQueryClient();
 
   const { data: availableClasses = [], isLoading } = useQuery({
     queryKey: ["classes"],
@@ -38,10 +36,8 @@ const AvailableClassesModal = ({ userId }: AvailableClassesModalProps) => {
     enabled: open,
   });
 
-  const { mutate: assignClass, isPending: isAssigning } = useEnrollClass(
-    userId,
-    () => setOpen(false)
-  );
+  const { mutate: assignClass, isPending: isAssigning } =
+    useEnrollClass(userId);
 
   if (isLoading) {
     return (
@@ -68,42 +64,47 @@ const AvailableClassesModal = ({ userId }: AvailableClassesModalProps) => {
         </DialogHeader>
         <div className="max-h-[400px] overflow-y-auto">
           <div className="space-y-2">
-            {availableClasses.map((gymClass: GymClass) => (
-              <div
-                key={gymClass.id}
-                className="flex items-center justify-between p-4 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
-              >
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-gray-100">
-                    {gymClass.name}
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {new Date(gymClass.date).toLocaleDateString("es-ES")} -{" "}
-                    {gymClass.time}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {gymClass.enrolled}/{gymClass.capacity} inscritos
-                  </p>
+            {availableClasses
+              .sort(
+                (a: GymClass, b: GymClass) =>
+                  new Date(a.date).getTime() - new Date(b.date).getTime()
+              )
+              .map((gymClass: GymClass) => (
+                <div
+                  key={gymClass.id}
+                  className="flex items-center justify-between p-4 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">
+                      {gymClass.name}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                      {new Date(gymClass.date).toLocaleDateString("es-ES")} -{" "}
+                      {gymClass.time}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {gymClass.enrolled}/{gymClass.capacity} inscritos
+                    </p>
+                  </div>
+                  {gymClass.users.includes(userId) ? (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Asignada
+                    </p>
+                  ) : (
+                    <Button
+                      onClick={() => assignClass(gymClass)}
+                      disabled={
+                        isAssigning || gymClass.enrolled >= gymClass.capacity
+                      }
+                      size="sm"
+                    >
+                      {gymClass.enrolled >= gymClass.capacity
+                        ? "Llena"
+                        : "Asignar"}
+                    </Button>
+                  )}
                 </div>
-                {gymClass.users.includes(userId) ? (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Asignada
-                  </p>
-                ) : (
-                  <Button
-                    onClick={() => assignClass(gymClass)}
-                    disabled={
-                      isAssigning || gymClass.enrolled >= gymClass.capacity
-                    }
-                    size="sm"
-                  >
-                    {gymClass.enrolled >= gymClass.capacity
-                      ? "Llena"
-                      : "Asignar"}
-                  </Button>
-                )}
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       </DialogContent>

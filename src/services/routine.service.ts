@@ -1,11 +1,16 @@
 import { Routine, RoutineExercise } from "@/types";
 import apiService from "./api.service";
 
+
 class RoutineService {
   private readonly apiService = apiService;
   async getAllRoutines() {
     const data = await this.apiService.get("/routines");
     return data.items as (Routine & { exercises: RoutineExercise[] })[];
+  }
+  async getRoutinesUsersCount() {
+    const data = await this.apiService.get("/routines/users-count");
+    return (data.items ?? []) as {name: string, usersCount: number}[];
   }
 
   async createRoutine(

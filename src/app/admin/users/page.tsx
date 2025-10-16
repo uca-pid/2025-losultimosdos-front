@@ -52,7 +52,7 @@ const UsersPage = () => {
 
   return (
     <div className="container mx-auto space-y-4 p-4">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-2">
         <h1 className="text-lg font-bold">Usuarios</h1>
       </div>
       <AdminUserTable users={users ?? []} />
