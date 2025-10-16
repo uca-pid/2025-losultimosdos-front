@@ -23,9 +23,6 @@ export const columns: ColumnDef<Exercise>[] = [
       return (
         <div>
           <div className="font-medium">{row.getValue("name")}</div>
-          <div className="text-sm text-muted-foreground">
-            {row.original.name}
-          </div>
         </div>
       );
     },
