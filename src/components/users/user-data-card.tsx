@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import { ALL_ROLES } from "@/lib/roles";
+const ALL_PLANS = ["basic", "premium"] as const;
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import userService from "@/services/user.service";
@@ -44,7 +45,7 @@ const UserDataCard = ({ user }: UserDataCardProps) => {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
 
-  const { mutate: updateRole, isPending: isUpdating } = useMutation({
+  const { mutate: updateRole, isPending: isUpdatingRole } = useMutation({
     mutationFn: async (newRole: string) => {
       const token = await getToken();
       return userService.updateUserRole(user.id, newRole, token!);
@@ -71,9 +72,54 @@ const UserDataCard = ({ user }: UserDataCardProps) => {
     },
   });
 
+  const { mutate: updatePlan, isPending: isUpdatingPlan } = useMutation({
+    mutationFn: async (newPlan: "basic" | "premium") => {
+      const token = await getToken();
+      return userService.updateUserPlan(user.id, newPlan, token!);
+    },
+    onMutate: async (newPlan) => {
+      await queryClient.cancelQueries({ queryKey: ["users", user.id] });
+      const prevUser = queryClient.getQueryData<User>(["users", user.id]);
+      queryClient.setQueryData(["users", user.id], (oldData: User) => {
+        return { ...oldData, plan: newPlan };
+      });
+      toast.success("Plan actualizado correctamente", { id: "update-plan" });
+      return { prevUser };
+    },
+    onError: (_error, _newPlan, context) => {
+      if (context?.prevUser) {
+        queryClient.setQueryData(["users", user.id], context.prevUser);
+      }
+      toast.error("Error al actualizar el plan del usuario", {
+        id: "update-plan",
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["users", user.id] });
+    },
+  });
+
   const handleRoleChange = (newRole: string) => {
     if (newRole === user.role) return;
     updateRole(newRole);
+  };
+
+  console.log(user);
+
+  const handlePlanChange = (newPlan: "basic" | "premium") => {
+    if (newPlan === user.plan) return;
+    updatePlan(newPlan);
+  };
+
+  const getPlanBadgeColor = (plan: string) => {
+    switch (plan) {
+      case "premium":
+        return "bg-yellow-500 text-white";
+      case "basic":
+        return "bg-gray-500 text-white";
+      default:
+        return "bg-gray-500 text-white";
+    }
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -130,43 +176,92 @@ const UserDataCard = ({ user }: UserDataCardProps) => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 flex-wrap">
-              <p className="text-sm text-gray-500">Rol:</p>
-              <Badge variant="outline" className={getRoleBadgeColor(user.role)}>
-                {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-              </Badge>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={isUpdating}
-                    className="ml-auto"
-                  >
-                    Cambiar Rol
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Seleccionar nuevo rol</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {ALL_ROLES.map((role) => (
-                    <DropdownMenuItem
-                      key={role}
-                      onClick={() => handleRoleChange(role)}
-                      disabled={role === user.role}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 flex-wrap">
+                <p className="text-sm text-gray-500">Rol:</p>
+                <Badge
+                  variant="outline"
+                  className={getRoleBadgeColor(user.role)}
+                >
+                  {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                </Badge>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={isUpdatingRole}
+                      className="ml-auto"
                     >
-                      <Badge
-                        variant="outline"
-                        className={`${getRoleBadgeColor(role)} mr-2`}
+                      Cambiar Rol
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Seleccionar nuevo rol</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {ALL_ROLES.map((role) => (
+                      <DropdownMenuItem
+                        key={role}
+                        onClick={() => handleRoleChange(role)}
+                        disabled={role === user.role}
                       >
-                        {role.charAt(0).toUpperCase() + role.slice(1)}
-                      </Badge>
-                      {role === user.role && "(Actual)"}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                        <Badge
+                          variant="outline"
+                          className={`${getRoleBadgeColor(role)} mr-2`}
+                        >
+                          {role.charAt(0).toUpperCase() + role.slice(1)}
+                        </Badge>
+                        {role === user.role && "(Actual)"}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <div className="flex items-center gap-3 flex-wrap">
+                <p className="text-sm text-gray-500">Plan:</p>
+                <Badge
+                  variant="outline"
+                  className={getPlanBadgeColor(user.plan)}
+                >
+                  {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
+                </Badge>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={isUpdatingPlan}
+                      className="ml-auto"
+                    >
+                      Cambiar Plan
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>
+                      Seleccionar nuevo plan
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {ALL_PLANS.map((plan) => (
+                      <DropdownMenuItem
+                        key={plan}
+                        onClick={() => handlePlanChange(plan)}
+                        disabled={plan === user.plan}
+                      >
+                        <Badge
+                          variant="outline"
+                          className={`${getPlanBadgeColor(plan)} mr-2`}
+                        >
+                          {plan.charAt(0).toUpperCase() + plan.slice(1)}
+                        </Badge>
+                        {plan === user.plan && "(Actual)"}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
         ) : (
@@ -204,46 +299,94 @@ const UserDataCard = ({ user }: UserDataCardProps) => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 flex-wrap">
-                <p className="text-sm text-gray-500">Rol:</p>
-                <Badge
-                  variant="outline"
-                  className={getRoleBadgeColor(user.role)}
-                >
-                  {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                </Badge>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={isUpdating}
-                      className="ml-2"
-                    >
-                      Cambiar Rol
-                      <ChevronDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Seleccionar nuevo rol</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {ALL_ROLES.map((role) => (
-                      <DropdownMenuItem
-                        key={role}
-                        onClick={() => handleRoleChange(role)}
-                        disabled={role === user.role}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <p className="text-sm text-gray-500">Rol:</p>
+                  <Badge
+                    variant="outline"
+                    className={getRoleBadgeColor(user.role)}
+                  >
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                  </Badge>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={isUpdatingRole}
+                        className="ml-2"
                       >
-                        <Badge
-                          variant="outline"
-                          className={`${getRoleBadgeColor(role)} mr-2`}
+                        Cambiar Rol
+                        <ChevronDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>
+                        Seleccionar nuevo rol
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {ALL_ROLES.map((role) => (
+                        <DropdownMenuItem
+                          key={role}
+                          onClick={() => handleRoleChange(role)}
+                          disabled={role === user.role}
                         >
-                          {role.charAt(0).toUpperCase() + role.slice(1)}
-                        </Badge>
-                        {role === user.role && "(Actual)"}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                          <Badge
+                            variant="outline"
+                            className={`${getRoleBadgeColor(role)} mr-2`}
+                          >
+                            {role.charAt(0).toUpperCase() + role.slice(1)}
+                          </Badge>
+                          {role === user.role && "(Actual)"}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <div className="flex items-center gap-3 flex-wrap">
+                  <p className="text-sm text-gray-500">Plan:</p>
+                  <Badge
+                    variant="outline"
+                    className={getPlanBadgeColor(user.plan)}
+                  >
+                    {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
+                  </Badge>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={isUpdatingPlan}
+                        className="ml-2"
+                      >
+                        Cambiar Plan
+                        <ChevronDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>
+                        Seleccionar nuevo plan
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {ALL_PLANS.map((plan) => (
+                        <DropdownMenuItem
+                          key={plan}
+                          onClick={() => handlePlanChange(plan)}
+                          disabled={plan === user.plan}
+                        >
+                          <Badge
+                            variant="outline"
+                            className={`${getPlanBadgeColor(plan)} mr-2`}
+                          >
+                            {plan.charAt(0).toUpperCase() + plan.slice(1)}
+                          </Badge>
+                          {plan === user.plan && "(Actual)"}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
             </div>
           </div>
