@@ -83,7 +83,7 @@ export function ChartArea() {
   const { data: chartData } = useQuery<
     { date: string; basic: number; premium: number }[]
   >({
-    queryKey: ["chart-data"],
+    queryKey: ["users-chart-data"],
     queryFn: async () => {
       const res = await apiService.get("/daily-user-count");
       return res.data.sort(

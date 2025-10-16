@@ -8,6 +8,9 @@ import { ChartLine } from "@/components/dashboard/linechart";
 import RoutineService from "@/services/routine.service";
 import ClassService from "@/services/class.service";
 import apiService from "@/services/api.service";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { User } from "@/types";
+import { useUsers } from "@/hooks/use-users";
 
 type ViewKey = "members" | "classes" | "hours" | "routines";
 
@@ -16,6 +19,7 @@ const AdminPage = () => {
   const [topRoutineName, setTopRoutineName] = useState<string>("—");
   const [topClassName, setTopClassName] = useState<string>("—");
   const [busiestHour, setBusiestHour] = useState<string>("—");
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     let mounted = true;
@@ -90,10 +94,12 @@ const AdminPage = () => {
     };
   }, []);
 
+  const { data: users } = useUsers();
+
   const stats = {
-    totalMembers: 1280,
-    newMembersPctLastMonth: 7.8,
-    busiestHour: "18:00",
+    totalMembers: users?.length ?? 0,
+    newMembersPctLastMonth: 0,
+    busiestHour: busiestHour,
     leastBusyHour: "12:00",
   };
 
@@ -122,9 +128,15 @@ const AdminPage = () => {
         <KpiCard
           active={view === "members"}
           onClick={() => setView("members")}
-          title="Miembros"
+          title="Usuarios"
           value={Intl.NumberFormat("es-AR").format(stats.totalMembers)}
-          subtitle={`${stats.newMembersPctLastMonth}% se unieron el último mes`}
+          subtitle={`${
+            users?.filter(
+              (user) =>
+                new Date(user.createdAt) >
+                new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+            ).length
+          } usuarios se unieron en los últimos 7 días`}
         />
 
         <KpiCard

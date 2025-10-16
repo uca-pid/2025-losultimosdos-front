@@ -19,6 +19,19 @@ export const useUserRoleMutation = (userId: string) => {
       queryClient.setQueryData(["users", userId], (oldData: User) => {
         return { ...oldData, role: newRole };
       });
+      queryClient.setQueryData<User[]>(
+        ["users"],
+        (oldData: User[] | undefined) => {
+          return (
+            oldData?.map((user) =>
+              user.id === userId
+                ? { ...user, role: newRole as "admin" | "user" }
+                : user
+            ) ?? []
+          );
+        }
+      );
+
       toast.success("Rol actualizado correctamente", { id: "update-role" });
       return { prevUser };
     },
@@ -32,6 +45,7 @@ export const useUserRoleMutation = (userId: string) => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["users", userId] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
 };
@@ -51,6 +65,18 @@ export const useUserPlanMutation = (userId: string) => {
       queryClient.setQueryData(["users", userId], (oldData: User) => {
         return { ...oldData, plan: newPlan };
       });
+      queryClient.setQueryData<User[]>(
+        ["users"],
+        (oldData: User[] | undefined) => {
+          return (
+            oldData?.map((user) =>
+              user.id === userId
+                ? { ...user, plan: newPlan as "basic" | "premium" }
+                : user
+            ) ?? []
+          );
+        }
+      );
       toast.success("Plan actualizado correctamente", { id: "update-plan" });
       return { prevUser };
     },
@@ -64,6 +90,7 @@ export const useUserPlanMutation = (userId: string) => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["users", userId] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
 };
