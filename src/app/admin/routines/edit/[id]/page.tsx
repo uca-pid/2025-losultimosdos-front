@@ -82,13 +82,10 @@ const EditRoutinePage = () => {
       return updatedRoutine;
     },
     onMutate: async (newRoutine) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ["routine", id] });
 
-      // Snapshot the previous value
       const previousRoutine = queryClient.getQueryData(["routine", id]);
 
-      // Optimistically update to the new value
       queryClient.setQueryData(["routine", id], {
         id: idNumber,
         name: newRoutine.name,

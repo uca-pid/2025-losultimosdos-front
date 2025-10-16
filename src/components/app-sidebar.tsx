@@ -5,6 +5,7 @@ import {
   IconUsers,
   IconStretching,
   IconDashboard,
+  IconHome,
 } from "@tabler/icons-react";
 import { Dumbbell } from "lucide-react";
 
@@ -37,6 +38,12 @@ export async function AppSidebar({
     },
     navMain: [
       {
+        title: "Dashboard",
+        url: "/" + user?.publicMetadata?.role + "/dashboard",
+        icon: IconHome,
+        roles: ["admin"],
+      },
+      {
         title: "Clases",
         url: "/" + user?.publicMetadata?.role + "/classes",
         icon: IconBook,
@@ -61,12 +68,6 @@ export async function AppSidebar({
         icon: IconAd,
         roles: ["admin"],
       },
-      {
-        title:"Dashboard",
-        url: "/" + user?.publicMetadata?.role + "/dashboard",
-        icon:IconDashboard,
-        roles:["admin"],
-      }
     ],
   };
 

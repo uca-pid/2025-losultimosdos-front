@@ -6,7 +6,8 @@ import { ChartBar } from "@/components/dashboard/barchart";
 import { ChartArea } from "@/components/dashboard/memberchart";
 import { ChartLine } from "@/components/dashboard/linechart";
 import RoutineService from "@/services/routine.service";
-import ClassService from "@/services/class.service"; 
+import ClassService from "@/services/class.service";
+import apiService from "@/services/api.service";
 
 type ViewKey = "members" | "classes" | "hours" | "routines";
 
@@ -20,13 +21,9 @@ const AdminPage = () => {
     let mounted = true;
     (async () => {
       try {
-        const res = await fetch(
-          `${
-            process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"
-          }/classes/busiest-hour?upcoming=true`
+        const json = await apiService.get(
+          "/classes/busiest-hour?upcoming=true"
         );
-        if (!res.ok) throw new Error(String(res.status));
-        const json = await res.json();
         if (!mounted) return;
         const top = json.top as { hour: string; total: number } | null;
         setBusiestHour(top ? `${top.hour}:00` : "Sin datos");
@@ -70,7 +67,6 @@ const AdminPage = () => {
     let mounted = true;
     (async () => {
       try {
-
         const items = await ClassService.getEnrollmentsCount(true);
         if (!mounted) return;
 
@@ -123,7 +119,6 @@ const AdminPage = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-
         <KpiCard
           active={view === "members"}
           onClick={() => setView("members")}
@@ -157,7 +152,6 @@ const AdminPage = () => {
         />
       </div>
 
-   
       <div className="rounded-2xl border bg-background p-3 shadow-sm h-[420px] overflow-hidden">
         <div className="mb-2 flex items-center justify-between">
           <p className="text-sm font-medium text-muted-foreground">
