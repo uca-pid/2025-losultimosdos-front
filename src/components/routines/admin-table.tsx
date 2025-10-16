@@ -99,6 +99,16 @@ const AdminRoutineTable = ({
     },
   ];
 
+  const translateLevel = (level: string) => {
+    switch (level) {
+      case "Beginner":
+        return "Principiante";
+      case "Intermediate":
+        return "Intermedio";
+      case "Advanced":
+        return "Avanzado";
+    }
+  };
   return (
     <>
       <div className="hidden sm:block">
@@ -160,7 +170,7 @@ const AdminRoutineTable = ({
 
                   <div className="text-gray-500 dark:text-gray-400">Nivel</div>
                   <div className="text-right text-gray-900 dark:text-gray-100">
-                    {rt.level ?? "-"}
+                    {translateLevel(rt.level) ?? "-"}
                   </div>
 
                   <div className="text-gray-500 dark:text-gray-400">
