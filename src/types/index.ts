@@ -18,6 +18,7 @@ export interface User {
   imageUrl: string;
   createdAt: string;
   role: "admin" | "user";
+  plan: "basic" | "premium";
 }
 
 export interface Routine {

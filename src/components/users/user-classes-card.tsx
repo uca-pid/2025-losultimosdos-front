@@ -45,6 +45,9 @@ const useIsMobile = (query = "(max-width: 640px)") => {
 const UserClassesCard = ({ userId }: UserClassesCardProps) => {
   const isMobile = useIsMobile();
   const { getToken } = useAuth();
+  const [unenrollingClassId, setUnenrollingClassId] = useState<number | null>(
+    null
+  );
   const { data: userClasses = [], isLoading: isLoadingClasses } = useQuery({
     queryKey: ["userClasses", userId],
     queryFn: async () => {
@@ -57,8 +60,7 @@ const UserClassesCard = ({ userId }: UserClassesCardProps) => {
     },
   });
 
-  const { mutate: unenrollClass, isPending: isUnenrolling } =
-    useUnenrollClass(userId);
+  const { mutate: unenrollClass } = useUnenrollClass(userId);
 
   return (
     <Card>
@@ -114,10 +116,17 @@ const UserClassesCard = ({ userId }: UserClassesCardProps) => {
                       variant="destructive"
                       size="sm"
                       className="w-full"
-                      onClick={() => unenrollClass(c)}
-                      disabled={isUnenrolling}
+                      onClick={() => {
+                        setUnenrollingClassId(c.id);
+                        unenrollClass(c, {
+                          onSettled: () => setUnenrollingClassId(null),
+                        });
+                      }}
+                      disabled={unenrollingClassId === c.id}
                     >
-                      {isUnenrolling ? "Cancelando..." : "Cancelar inscripción"}
+                      {unenrollingClassId === c.id
+                        ? "Cancelando..."
+                        : "Cancelar inscripción"}
                     </Button>
                   </div>
                 </div>
@@ -166,10 +175,15 @@ const UserClassesCard = ({ userId }: UserClassesCardProps) => {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => unenrollClass(c)}
-                        disabled={isUnenrolling}
+                        onClick={() => {
+                          setUnenrollingClassId(c.id);
+                          unenrollClass(c, {
+                            onSettled: () => setUnenrollingClassId(null),
+                          });
+                        }}
+                        disabled={unenrollingClassId === c.id}
                       >
-                        {isUnenrolling
+                        {unenrollingClassId === c.id
                           ? "Cancelando..."
                           : "Cancelar inscripción"}
                       </Button>

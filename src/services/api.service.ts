@@ -21,13 +21,16 @@ export class ApiService {
     body: Record<string, unknown>,
     token: string
   ): Promise<T> {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+      "ngrok-skip-browser-warning": "1",
+    };
+
     const response = await fetch(this.baseUrl + endpoint, {
       method: "POST",
       body: JSON.stringify(body),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
+      headers,
     });
     if (response.status >= 500) {
       console.log(response.body, response.status);
@@ -42,11 +45,16 @@ export class ApiService {
   }
 
   async get(endpoint: string, token?: string) {
-    const response = await fetch(this.baseUrl + endpoint, {
+    const headers = {
+      Authorization: token ? "Bearer " + token : "",
+      "ngrok-skip-browser-warning": "1",
+    };
+    const normalizedEndpoint = endpoint.startsWith("/")
+      ? endpoint
+      : `/${endpoint}`;
+    const response = await fetch(`${this.baseUrl}${normalizedEndpoint}`, {
       method: "GET",
-      headers: {
-        Authorization: token ? "Bearer " + token : "",
-      },
+      headers,
     });
     if (response.status >= 500) {
       console.log(response.body, response.status);
@@ -68,13 +76,14 @@ export class ApiService {
     const headers = {
       "Content-Type": "application/json",
       Authorization: "Bearer " + token,
+      "ngrok-skip-browser-warning": "1",
       ...additionalHeaders,
     };
 
     const response = await fetch(this.baseUrl + endpoint, {
       method: "PUT",
       body: JSON.stringify(body),
-      headers: headers,
+      headers,
     });
     if (response.status >= 500) {
       console.log(response.body, response.status);
@@ -90,10 +99,11 @@ export class ApiService {
     const headers = {
       "Content-Type": "application/json",
       Authorization: "Bearer " + token,
+      "ngrok-skip-browser-warning": "1",
     };
     const response = await fetch(this.baseUrl + endpoint, {
       method: "DELETE",
-      headers: headers,
+      headers,
     });
     if (response.status >= 500) {
       console.log(response.body, response.status);

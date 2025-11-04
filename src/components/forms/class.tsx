@@ -33,7 +33,15 @@ const classFormSchema = z.object({
     today.setHours(0, 0, 0, 0);
     return date >= today;
   }, "La fecha tiene que ser en el futuro"),
-  time: z.string(),
+  time: z.string().refine(
+    (time) => {
+      const [hours, minutes] = time.split(":").map(Number);
+      return hours >= 8 && hours < 21;
+    },
+    {
+      message: "La hora tiene que ser entre las 8:00 y 21:00",
+    }
+  ),
   capacity: z
     .number("La capacidad debe ser un número")
     .min(1, "La capacidad debe ser al menos 1")

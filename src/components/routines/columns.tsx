@@ -4,6 +4,18 @@ import { Routine } from "@/types";
 import { type ColumnDef } from "@tanstack/react-table";
 import { ICONS } from "@/components/forms/routine"; // el mapping de arriba
 
+const translateLevel = (level: "Beginner" | "Intermediate" | "Advanced") => {
+  switch (level) {
+    case "Beginner":
+      return "Principiante";
+    case "Intermediate":
+      return "Intermedio";
+    case "Advanced":
+      return "Avanzado";
+    default:
+      return "-";
+  }
+};
 const columns: ColumnDef<Routine>[] = [
   {
     accessorKey: "icon",
@@ -40,7 +52,7 @@ const columns: ColumnDef<Routine>[] = [
     accessorKey: "level",
     header: "Nivel",
     cell: ({ row }) => {
-      return <div>{row.original.level}</div>;
+      return <div>{translateLevel(row.original.level)}</div>;
     },
   },
   {

@@ -179,10 +179,15 @@ export const RoutineForm = ({
                   <FormItem>
                     <FormLabel>Nivel</FormLabel>
                     <FormControl>
-                      <Select {...field}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un nivel" />
-                        </SelectTrigger>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona un nivel" />
+                          </SelectTrigger>
+                        </FormControl>
                         <SelectContent>
                           <SelectItem value="Beginner">Principiante</SelectItem>
                           <SelectItem value="Intermediate">
