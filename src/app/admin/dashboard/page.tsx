@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import ChartPiee from "@/components/dashboard/piechart";
 import { ChartBar } from "@/components/dashboard/barchart";
 import { ChartArea } from "@/components/dashboard/memberchart";
@@ -8,93 +8,73 @@ import { ChartLine } from "@/components/dashboard/linechart";
 import RoutineService from "@/services/routine.service";
 import ClassService from "@/services/class.service";
 import apiService from "@/services/api.service";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { User } from "@/types";
+import { useQuery } from "@tanstack/react-query";
 import { useUsers } from "@/hooks/use-users";
-
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSearchParams, useRouter } from "next/navigation";
 type ViewKey = "members" | "classes" | "hours" | "routines";
 
 const AdminPage = () => {
-  const [view, setView] = useState<ViewKey>("members");
-  const [topRoutineName, setTopRoutineName] = useState<string>("—");
-  const [topClassName, setTopClassName] = useState<string>("—");
-  const [busiestHour, setBusiestHour] = useState<string>("—");
-  const queryClient = useQueryClient();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const view = searchParams.get("view") as ViewKey;
 
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const json = await apiService.get(
-          "/classes/busiest-hour?upcoming=true"
-        );
-        if (!mounted) return;
-        const top = json.top as { hour: string; total: number } | null;
-        setBusiestHour(top ? `${top.hour}:00` : "Sin datos");
-      } catch {
-        if (!mounted) return;
-        setBusiestHour("Error");
+    if (!searchParams.get("view")) {
+      const params = new URLSearchParams(searchParams);
+      params.set("view", "members");
+      router.replace(`?${params.toString()}`);
+    }
+  }, [searchParams, router]);
+
+  const { data: busiestHourData, isLoading: isLoadingBusiestHour } = useQuery({
+    queryKey: ["busiest-hour"],
+    queryFn: async () => {
+      const json = await apiService.get("/classes/busiest-hour?upcoming=true");
+      const top = json.top as { hour: string; total: number } | null;
+      return top ? `${top.hour}:00` : "Sin datos";
+    },
+  });
+
+  const { data: topRoutineData, isLoading: isLoadingTopRoutine } = useQuery({
+    queryKey: ["top-routine"],
+    queryFn: async () => {
+      const items = await RoutineService.getRoutinesUsersCount();
+
+      if (!items || items.length === 0) {
+        return "Sin rutinas";
       }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const items = await RoutineService.getRoutinesUsersCount();
-        if (!mounted) return;
-
-        if (!items || items.length === 0) {
-          setTopRoutineName("Sin rutinas");
-          return;
-        }
-        let max = items[0];
-        for (let i = 1; i < items.length; i++) {
-          if (items[i].usersCount > max.usersCount) max = items[i];
-        }
-        setTopRoutineName(max.usersCount > 0 ? max.name : "Sin asignaciones");
-      } catch {
-        if (!mounted) return;
-        setTopRoutineName("Error");
+      let max = items[0];
+      for (let i = 1; i < items.length; i++) {
+        if (items[i].usersCount > max.usersCount) max = items[i];
       }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+      return max.usersCount > 0 ? max.name : "Sin asignaciones";
+    },
+  });
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const items = await ClassService.getEnrollmentsCount(true);
-        if (!mounted) return;
+  const { data: topClassData, isLoading: isLoadingTopClass } = useQuery({
+    queryKey: ["top-class"],
+    queryFn: async () => {
+      const items = await ClassService.getEnrollmentsCount(true);
 
-        if (!items || items.length === 0) {
-          setTopClassName("Sin clases");
-          return;
-        }
-
-        let max = items[0];
-        for (let i = 1; i < items.length; i++) {
-          if (items[i].enrollCount > max.enrollCount) max = items[i];
-        }
-        setTopClassName(max.enrollCount > 0 ? max.name : "Sin inscriptos");
-      } catch {
-        if (!mounted) return;
-        setTopClassName("Error");
+      if (!items || items.length === 0) {
+        return "Sin clases";
       }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
-  const { data: users } = useUsers();
+      let max = items[0];
+      for (let i = 1; i < items.length; i++) {
+        if (items[i].enrollCount > max.enrollCount) max = items[i];
+      }
+      return max.enrollCount > 0 ? max.name : "Sin inscriptos";
+    },
+  });
+
+  const { data: users, isLoading: isLoadingUsers } = useUsers();
+
+  const busiestHour = busiestHourData ?? "—";
+  const topRoutineName = topRoutineData ?? "—";
+  const topClassName = topClassData ?? "—";
 
   const stats = {
     totalMembers: users?.length ?? 0,
@@ -106,16 +86,38 @@ const AdminPage = () => {
   const renderChart = () => {
     switch (view) {
       case "members":
-        return <ChartArea />;
+        return isLoadingUsers ? (
+          <Skeleton className="h-full w-full" />
+        ) : (
+          <ChartArea />
+        );
       case "classes":
-        return <ChartBar />;
+        return isLoadingTopClass ? (
+          <Skeleton className="h-full w-full" />
+        ) : (
+          <ChartBar />
+        );
       case "hours":
-        return <ChartLine />;
+        return isLoadingBusiestHour ? (
+          <Skeleton className="h-full w-full" />
+        ) : (
+          <ChartLine />
+        );
       case "routines":
-        return <ChartPiee />;
+        return isLoadingTopRoutine ? (
+          <Skeleton className="h-full w-full" />
+        ) : (
+          <ChartPiee />
+        );
       default:
         return null;
     }
+  };
+
+  const handleViewChange = (view: ViewKey) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("view", view);
+    router.push(`?${params.toString()}`);
   };
 
   return (
@@ -127,7 +129,7 @@ const AdminPage = () => {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           active={view === "members"}
-          onClick={() => setView("members")}
+          onClick={() => handleViewChange("members")}
           title="Usuarios"
           value={Intl.NumberFormat("es-AR").format(stats.totalMembers)}
           subtitle={`${
@@ -137,30 +139,34 @@ const AdminPage = () => {
                 new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
             ).length
           } usuarios se unieron en los últimos 7 días`}
+          isLoading={isLoadingUsers}
         />
 
         <KpiCard
           active={view === "classes"}
-          onClick={() => setView("classes")}
+          onClick={() => handleViewChange("classes")}
           title="Clases"
           value={topClassName}
           subtitle="Más concurrida (próximas)"
+          isLoading={isLoadingTopClass}
         />
 
         <KpiCard
           active={view === "hours"}
-          onClick={() => setView("hours")}
+          onClick={() => handleViewChange("hours")}
           title="Horarios"
           value={`Pico: ${busiestHour}`}
           subtitle={`(De las proximas clases)`}
+          isLoading={isLoadingBusiestHour}
         />
 
         <KpiCard
           active={view === "routines"}
-          onClick={() => setView("routines")}
+          onClick={() => handleViewChange("routines")}
           title="Rutinas"
           value={topRoutineName}
           subtitle="Con más usuarios"
+          isLoading={isLoadingTopRoutine}
         />
       </div>
 
@@ -190,13 +196,19 @@ function KpiCard({
   title,
   value,
   subtitle,
+  isLoading,
 }: {
   active: boolean;
   onClick: () => void;
   title: string;
   value?: string;
   subtitle?: string;
+  isLoading?: boolean;
 }) {
+  if (isLoading) {
+    return <Skeleton className="h-full w-full" />;
+  }
+
   return (
     <button
       onClick={onClick}

@@ -76,6 +76,7 @@ export async function AppSidebar({
     email: user?.emailAddresses[0].emailAddress || "",
     avatar: user?.imageUrl || "",
   };
+
   return (
     <Sidebar variant="inset" collapsible="offcanvas" {...props}>
       <SidebarHeader>

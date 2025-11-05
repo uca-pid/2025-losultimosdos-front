@@ -91,6 +91,7 @@ export const useUserPlanMutation = (userId: string) => {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["users", userId] });
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["users-chart-data"] });
     },
   });
 };
