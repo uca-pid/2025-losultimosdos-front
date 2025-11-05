@@ -1,3 +1,7 @@
+export type GymGoalType = "MEMBERS" | "CLASS" | "ROUTINE";
+export type GymGoalMembersScope = "TOTAL" | "BASIC" | "PREMIUM";
+
+
 export interface GymClass {
   id: number;
   name: string;
@@ -50,5 +54,19 @@ export interface RoutineExercise {
   exerciseId: number;
   sets?: number;
   reps?: number;
-  restTime?: number; // in seconds
+  restTime?: number; 
+}
+
+export interface GymGoal {
+  id: number;
+  title: string;
+  description: string;
+  type: GymGoalType;
+  membersScope?: GymGoalMembersScope | null;
+  classId?: number | null;
+  routineId?: number | null;
+  targetValue: number;
+  progress: number;
+  endDate: string; 
+  completed: boolean;
 }

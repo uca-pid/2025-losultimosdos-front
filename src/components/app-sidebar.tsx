@@ -68,6 +68,12 @@ export async function AppSidebar({
         icon: IconAd,
         roles: ["admin"],
       },
+      {
+        title: "Metas",
+        url: "/" + user?.publicMetadata?.role + "/goals",
+        icon: IconAd,
+        roles: ["admin"],
+      },
     ],
   };
 
