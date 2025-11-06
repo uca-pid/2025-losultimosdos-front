@@ -1,16 +1,20 @@
 "use client";
 
-import { User } from "@/types";
+import { Sede, User } from "@/types";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ALL_ROLES } from "@/lib/roles";
 import {
   useUserRoleMutation,
   useUserPlanMutation,
+  useUserSedeMutation,
 } from "@/hooks/use-user-mutations";
 import { UserAvatar } from "./user-avatar";
 import { UserInfo } from "./user-info";
 import { UserRolePlanSelector } from "./user-role-plan-selector";
+import UserSedeSelector from "./user-sede-selector";
+import apiService from "@/services/api.service";
+import { useQuery } from "@tanstack/react-query";
 
 const ALL_PLANS = ["basic", "premium"] as const;
 
@@ -26,6 +30,21 @@ const UserDataCard = ({ user }: UserDataCardProps) => {
   const { mutate: updatePlan, isPending: isUpdatingPlan } = useUserPlanMutation(
     user.id
   );
+  const { mutate: updateSede, isPending: isUpdatingSede } = useUserSedeMutation(
+    user.id
+  );
+  const { data: sedes } = useQuery({
+    queryKey: ["sedes"],
+    queryFn: async () => {
+      const response = await apiService.get("/sedes");
+      return response.sedes as Sede[];
+    },
+  });
+
+  const handleSedeChange = (newSede: { id: number; name: string }) => {
+    if (newSede.id === user.sedeId) return;
+    updateSede(newSede.id);
+  };
 
   const handleRoleChange = (newRole: string) => {
     if (newRole === user.role) return;
@@ -61,7 +80,7 @@ const UserDataCard = ({ user }: UserDataCardProps) => {
               isMobile={isMobile}
             />
 
-            <div className="space-y-4">
+            <div className="space-y-4 flex flex-col md:flex-row md:items-start md:gap-4 mt-2">
               <UserRolePlanSelector
                 type="role"
                 currentValue={user.role}
@@ -76,6 +95,22 @@ const UserDataCard = ({ user }: UserDataCardProps) => {
                 options={ALL_PLANS}
                 isUpdating={isUpdatingPlan}
                 onValueChange={handlePlanChange}
+              />
+
+              <UserSedeSelector
+                currentValue={{
+                  id: user.sedeId,
+                  name:
+                    sedes?.find((sede) => sede.id === user.sedeId)?.name || "",
+                }}
+                options={
+                  sedes?.map((sede) => ({
+                    id: sede.id,
+                    name: sede.name,
+                  })) || []
+                }
+                isUpdating={isUpdatingSede}
+                onValueChange={handleSedeChange}
               />
             </div>
           </div>
