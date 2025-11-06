@@ -6,7 +6,7 @@ import { ChartBar } from "@/components/dashboard/barchart";
 import { ChartArea } from "@/components/dashboard/memberchart";
 import { ChartLine } from "@/components/dashboard/linechart";
 import RoutineService from "@/services/routine.service";
-import ClassService from "@/services/class.service";
+import ClassService, { ClassEnrollItem } from "@/services/class.service";
 import apiService from "@/services/api.service";
 import { useQuery } from "@tanstack/react-query";
 import { useUsers } from "@/hooks/use-users";
@@ -15,6 +15,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useStore } from "@/store/useStore";
 import userService from "@/services/user.service";
 import { useAuth } from "@clerk/nextjs";
+
 type ViewKey = "members" | "classes" | "hours" | "routines";
 
 const AdminPage = () => {
@@ -56,13 +57,17 @@ const AdminPage = () => {
     queryFn: async () => {
       const items = await RoutineService.getRoutinesUsersCount(selectedSede.id);
 
-      if (!items || items.length === 0) {
+      const filteredItems = items.filter(
+        (item) => item.sede.id === selectedSede.id
+      );
+      if (!filteredItems || filteredItems.length === 0) {
         return "Sin rutinas";
       }
 
-      let max = items[0];
-      for (let i = 1; i < items.length; i++) {
-        if (items[i].usersCount > max.usersCount) max = items[i];
+      let max = filteredItems[0];
+      for (let i = 1; i < filteredItems.length; i++) {
+        if (filteredItems[i].usersCount > max.usersCount)
+          max = filteredItems[i];
       }
       return max.usersCount > 0 ? max.name : "Sin asignaciones";
     },
@@ -76,19 +81,23 @@ const AdminPage = () => {
         selectedSede.id
       );
 
-      if (!items || items.length === 0) {
+      const filteredItems = items.filter(
+        (item: ClassEnrollItem) => item.sede.id === selectedSede.id
+      );
+
+      if (!filteredItems || filteredItems.length === 0) {
         return "Sin clases";
       }
 
-      let max = items[0];
-      for (let i = 1; i < items.length; i++) {
-        if (items[i].enrollCount > max.enrollCount) max = items[i];
+      let max = filteredItems[0];
+      for (let i = 1; i < filteredItems.length; i++) {
+        if (filteredItems[i].enrollCount > max.enrollCount)
+          max = filteredItems[i];
       }
       return max.enrollCount > 0 ? max.name : "Sin inscriptos";
     },
   });
 
-  // const { data: users, isLoading: isLoadingUsers } = useUsers();
   const { data: users, isLoading: isLoadingUsers } = useQuery({
     queryKey: ["users-by-sede", selectedSede.id],
     queryFn: async () => {

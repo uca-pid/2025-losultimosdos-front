@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@clerk/themes/shadcn.css";
+@import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -213,4 +214,9 @@
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
   }
+}
+
+/* Leaflet map marker styling */
+.existing-sede-marker {
+  filter: hue-rotate(220deg) saturate(1.2);
 }
