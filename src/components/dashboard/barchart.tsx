@@ -20,6 +20,7 @@ import {
 
 import ClassService, { type ClassEnrollItem } from "@/services/class.service";
 import { useStore } from "@/store/useStore";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Point = ClassEnrollItem & { short: string };
 
@@ -61,6 +62,7 @@ function EnrollTooltip({
 
 export function ChartBar() {
   const { selectedSede } = useStore();
+  const isMobile = useIsMobile();
 
   const {
     data: items = [],
@@ -69,7 +71,10 @@ export function ChartBar() {
   } = useQuery({
     queryKey: ["class-enrollments"],
     queryFn: async () => {
-      const items = await ClassService.getEnrollmentsCount(true);
+      const items = await ClassService.getEnrollmentsCount(
+        true,
+        selectedSede.id
+      );
       return (items ?? [])
         .map((c) => ({ ...c, short: shorten(c.name) }))
         .sort(
@@ -116,6 +121,54 @@ export function ChartBar() {
         ) : noEnrolls ? (
           <div className="pt-6 text-sm text-muted-foreground">
             Aún no hay inscriptos en ninguna clase.
+          </div>
+        ) : isMobile ? (
+          <div className="h-full w-full overflow-x-auto">
+            <ChartContainer
+              config={chartConfig}
+              className="h-full"
+              style={{
+                minWidth: `${Math.max(100, chartData.length * 60)}%`,
+                width:
+                  chartData.length > 5 ? `${chartData.length * 60}%` : "100%",
+              }}
+            >
+              <BarChart
+                accessibilityLayer
+                data={chartData}
+                margin={{ top: 20, right: 16, left: 8, bottom: 8 }}
+              >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="short"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  tickFormatter={(value: string) => (value ?? "").slice(0, 3)}
+                />
+
+                <ChartTooltip cursor={false} content={<EnrollTooltip />} />
+                <Bar dataKey="enroll" radius={8}>
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={
+                        entry.sede?.id === selectedSede.id
+                          ? "var(--chart-2)"
+                          : "var(--chart-1)"
+                      }
+                    />
+                  ))}
+                  <LabelList
+                    dataKey="enroll"
+                    position="top"
+                    offset={12}
+                    className="fill-foreground"
+                    fontSize={12}
+                  />
+                </Bar>
+              </BarChart>
+            </ChartContainer>
           </div>
         ) : (
           <ChartContainer config={chartConfig} className="h-full w-full">
