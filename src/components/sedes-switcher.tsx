@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import { useState } from "react";
-import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
+import { Building2, Check, ChevronsUpDown, PlusCircle } from "lucide-react";
 import { Separator } from "./ui/separator";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -28,12 +29,13 @@ import { SedeForm, SedeFormValues } from "./forms/sede";
 import toast from "react-hot-toast";
 import { useAuth } from "@clerk/nextjs";
 
-export function SedesSwitcher() {
+export function SedesSwitcher({ isAdmin }: { isAdmin: boolean }) {
   const { selectedSede, setSelectedSede } = useStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
+
   const { data: sedes, isLoading } = useQuery({
     queryKey: ["sedes"],
     queryFn: async () => {
@@ -45,7 +47,7 @@ export function SedesSwitcher() {
   const handleCreateSede = async (values: SedeFormValues) => {
     try {
       const token = await getToken();
-      const response = await apiService.post("/admin/sedes", values, token!);
+      await apiService.post("/admin/sedes", values, token!);
       toast.success("Sede creada correctamente");
       setIsModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ["sedes"] });
@@ -63,55 +65,98 @@ export function SedesSwitcher() {
     setIsModalOpen(true);
   };
 
+  const handleSedeSelect = (sede: Sede) => {
+    setSelectedSede(sede);
+  };
+
+  if (isLoading) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <Skeleton className="h-10 w-full rounded-md" />
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full">
-              {selectedSede?.name || "Seleccionar sede"}
-              <ChevronsUpDown className="ml-auto" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width)"
-            align="start"
-          >
-            {isLoading ? (
-              <DropdownMenuItem>
-                <Skeleton className="h-4 w-4" />
-              </DropdownMenuItem>
-            ) : (
-              sedes?.map((sede) => (
-                <DropdownMenuItem
-                  key={sede.id}
-                  onSelect={() => setSelectedSede(sede)}
-                >
-                  {sede.name}{" "}
-                  {sede.id === selectedSede?.id && (
-                    <Check className="ml-auto" />
-                  )}
-                </DropdownMenuItem>
-              ))
-            )}
-            <Separator />
-            <DropdownMenuItem
-              className="m-2"
-              onSelect={handleAddSedeClick}
-              tabIndex={0}
-              aria-label="Agregar nueva sede"
+        {isAdmin ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between hover:bg-accent hover:text-accent-foreground transition-colors"
+                aria-label="Seleccionar sede"
+              >
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4 opacity-70" />
+                  <span className="font-medium">
+                    {selectedSede?.name || "Seleccionar sede"}
+                  </span>
+                </div>
+                <ChevronsUpDown className="h-4 w-4 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-[--radix-dropdown-menu-trigger-width] min-w-[200px]"
+              align="start"
             >
-              <PlusCircle className=" h-4 w-4" />
-              Agregar sede
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuLabel className="text-xs text-muted-foreground">
+                Sedes disponibles
+              </DropdownMenuLabel>
+              {sedes && sedes.length > 0 ? (
+                sedes.map((sede) => (
+                  <DropdownMenuItem
+                    key={sede.id}
+                    onSelect={() => handleSedeSelect(sede)}
+                    className="cursor-pointer"
+                  >
+                    <Building2 className="mr-2 h-4 w-4 opacity-70" />
+                    <span className="flex-1">{sede.name}</span>
+                    {sede.id === selectedSede?.id && (
+                      <Check className="h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                ))
+              ) : (
+                <DropdownMenuItem disabled>
+                  No hay sedes disponibles
+                </DropdownMenuItem>
+              )}
+              <Separator className="my-1" />
+              <DropdownMenuItem
+                onSelect={handleAddSedeClick}
+                className="cursor-pointer text-primary"
+                tabIndex={0}
+                aria-label="Agregar nueva sede"
+              >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                <span className="font-medium">Agregar sede</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2">
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <div className="flex flex-col">
+              <span className="text-xs text-muted-foreground">Sede actual</span>
+              <span className="text-sm font-medium">
+                {selectedSede?.name || "Sin sede asignada"}
+              </span>
+            </div>
+          </div>
+        )}
       </SidebarMenuItem>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Agregar nueva sede</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Agregar nueva sede
+            </DialogTitle>
             <DialogDescription>
               Completa los datos de la nueva sede y selecciona su ubicación en
               el mapa.

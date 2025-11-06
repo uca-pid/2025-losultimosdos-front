@@ -99,7 +99,8 @@ export async function AppSidebar({
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SedesSwitcher />
+
+          <SedesSwitcher isAdmin={user?.publicMetadata.role === "admin"} />
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
