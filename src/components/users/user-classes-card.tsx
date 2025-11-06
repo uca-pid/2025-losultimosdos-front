@@ -23,9 +23,10 @@ import {
 } from "../ui/table";
 import AvailableClassesModal from "../classes/available-classes-modal";
 import { useUnenrollClass } from "@/hooks/use-class-mutations";
+import { User } from "@/types";
 
 interface UserClassesCardProps {
-  userId: string;
+  user: User;
 }
 
 const useIsMobile = (query = "(max-width: 640px)") => {
@@ -42,18 +43,19 @@ const useIsMobile = (query = "(max-width: 640px)") => {
   return isMobile;
 };
 
-const UserClassesCard = ({ userId }: UserClassesCardProps) => {
+const UserClassesCard = ({ user }: UserClassesCardProps) => {
+  const { id: userId, sedeId } = user;
   const isMobile = useIsMobile();
   const { getToken } = useAuth();
   const [unenrollingClassId, setUnenrollingClassId] = useState<number | null>(
     null
   );
   const { data: userClasses = [], isLoading: isLoadingClasses } = useQuery({
-    queryKey: ["userClasses", userId],
+    queryKey: ["userClasses", user.id],
     queryFn: async () => {
       const token = await getToken();
       const response = await apiService.get(
-        `/admin/users/${userId}/classes`,
+        `/admin/users/${userId}/classes?sedeId=${sedeId}`,
         token!
       );
       return response.classes || [];
@@ -67,7 +69,7 @@ const UserClassesCard = ({ userId }: UserClassesCardProps) => {
       <CardHeader>
         <CardTitle>Clases del Usuario</CardTitle>
         <CardAction>
-          <AvailableClassesModal userId={userId} />
+          <AvailableClassesModal user={user} />
         </CardAction>
       </CardHeader>
       <CardContent>

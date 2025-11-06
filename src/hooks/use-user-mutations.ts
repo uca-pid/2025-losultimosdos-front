@@ -3,6 +3,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import userService from "@/services/user.service";
 import { toast } from "react-hot-toast";
+import { useStore } from "@/store/useStore";
 
 export const useUserRoleMutation = (userId: string) => {
   const { getToken } = useAuth();
@@ -91,6 +92,58 @@ export const useUserPlanMutation = (userId: string) => {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["users", userId] });
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["users-chart-data"] });
+    },
+  });
+};
+
+export const useUserSedeMutation = (userId: string) => {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+  const { selectedSede } = useStore();
+  return useMutation({
+    mutationFn: async (newSedeId: number) => {
+      const token = await getToken();
+      toast.loading("Actualizando sede...", { id: "update-sede" });
+      return userService.updateUserSede(userId, newSedeId, token!);
+    },
+
+    onSuccess: () => {
+      toast.success("Sede actualizada correctamente", { id: "update-sede" });
+    },
+    onMutate: async (newSedeId) => {
+      await queryClient.cancelQueries({ queryKey: ["users", userId] });
+      const prevUser = queryClient.getQueryData<User>(["users", userId]);
+      queryClient.setQueryData(["users", userId], (oldData: User) => {
+        return { ...oldData, sedeId: newSedeId };
+      });
+      queryClient.setQueryData<User[]>(
+        ["users"],
+        (oldData: User[] | undefined) => {
+          return (
+            oldData?.map((user) =>
+              user.id === userId ? { ...user, sedeId: newSedeId } : user
+            ) ?? []
+          );
+        }
+      );
+      return { prevUser };
+    },
+    onError: (error: any, _newSedeId, context) => {
+      if (context?.prevUser) {
+        queryClient.setQueryData(["users", userId], context.prevUser);
+      }
+
+      const errorMessage =
+        error?.message || "Error al actualizar la sede del usuario";
+      toast.error(errorMessage, {
+        id: "update-sede",
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["users", userId] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["goals", selectedSede.id] });
     },
   });
 };

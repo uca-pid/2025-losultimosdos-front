@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import apiService from "@/services/api.service";
-import { GymClass } from "@/types";
+import { GymClass, User } from "@/types";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import {
@@ -18,19 +18,22 @@ import {
 import { useEnrollClass } from "@/hooks/use-class-mutations";
 
 interface AvailableClassesModalProps {
-  userId: string;
+  user: User;
 }
 
-const AvailableClassesModal = ({ userId }: AvailableClassesModalProps) => {
+const AvailableClassesModal = ({ user }: AvailableClassesModalProps) => {
   const [open, setOpen] = useState(false);
   const { getToken } = useAuth();
-
+  const { id: userId, sedeId } = user;
   const { data: availableClasses = [], isLoading } = useQuery({
-    queryKey: ["classes"],
+    queryKey: ["classes", sedeId],
     queryFn: async () => {
       const token = await getToken();
 
-      const response = await apiService.get("/classes", token!);
+      const response = await apiService.get(
+        `/classes?sedeId=${sedeId}`,
+        token!
+      );
       return response.classes || [];
     },
     enabled: open,

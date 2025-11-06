@@ -6,6 +6,7 @@ import {
   IconStretching,
   IconDashboard,
   IconHome,
+  IconTarget,
 } from "@tabler/icons-react";
 import { Dumbbell } from "lucide-react";
 
@@ -23,7 +24,7 @@ import {
 
 import { currentUser } from "@clerk/nextjs/server";
 import { Skeleton } from "./ui/skeleton";
-import { title } from "process";
+import { SedesSwitcher } from "./sedes-switcher";
 
 export async function AppSidebar({
   ...props
@@ -41,6 +42,12 @@ export async function AppSidebar({
         title: "Dashboard",
         url: "/" + user?.publicMetadata?.role + "/dashboard",
         icon: IconHome,
+        roles: ["admin"],
+      },
+      {
+        title: "Metas",
+        url: "/" + user?.publicMetadata?.role + "/goals",
+        icon: IconTarget,
         roles: ["admin"],
       },
       {
@@ -76,6 +83,7 @@ export async function AppSidebar({
     email: user?.emailAddresses[0].emailAddress || "",
     avatar: user?.imageUrl || "",
   };
+
   return (
     <Sidebar variant="inset" collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -91,6 +99,8 @@ export async function AppSidebar({
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
+
+          <SedesSwitcher isAdmin={user?.publicMetadata.role === "admin"} />
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>

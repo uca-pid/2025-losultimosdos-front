@@ -24,7 +24,6 @@ export class ApiService {
     const headers = {
       "Content-Type": "application/json",
       Authorization: "Bearer " + token,
-      "ngrok-skip-browser-warning": "1",
     };
 
     const response = await fetch(this.baseUrl + endpoint, {
@@ -47,7 +46,6 @@ export class ApiService {
   async get(endpoint: string, token?: string) {
     const headers = {
       Authorization: token ? "Bearer " + token : "",
-      "ngrok-skip-browser-warning": "1",
     };
     const normalizedEndpoint = endpoint.startsWith("/")
       ? endpoint
@@ -67,12 +65,12 @@ export class ApiService {
     return data;
   }
 
-  async put(
+  async put<T = any>(
     endpoint: string,
     body: Record<string, unknown>,
     token: string,
     additionalHeaders?: Record<string, string>
-  ) {
+  ): Promise<T> {
     const headers = {
       "Content-Type": "application/json",
       Authorization: "Bearer " + token,
@@ -85,14 +83,17 @@ export class ApiService {
       body: JSON.stringify(body),
       headers,
     });
+
     if (response.status >= 500) {
       console.log(response.body, response.status);
       throw new Error("Server error");
     } else if (response.status >= 400) {
       const { error, details } = await response.json();
+      console.log("error", error, details);
       throw new ApiValidationError(details, response.status);
     }
-    return response;
+    const data = await response.json();
+    return data;
   }
 
   async delete(endpoint: string, token: string) {
@@ -109,7 +110,7 @@ export class ApiService {
       console.log(response.body, response.status);
       throw new Error("Server error");
     } else if (response.status >= 400) {
-      const { error, details } = await response.json();
+      const { error, details, message } = await response.json();
       throw new ApiValidationError(details, response.status);
     }
     return response;

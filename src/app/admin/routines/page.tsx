@@ -7,12 +7,15 @@ import AdminRoutineTable from "@/components/routines/admin-table";
 import { useQuery } from "@tanstack/react-query";
 import { DataTable } from "@/components/ui/data-table";
 import TableSkeleton from "@/components/skeletons/table-skeleton";
+import { useStore } from "@/store/useStore";
+import { useEffect } from "react";
 
 const RoutinesPage = () => {
+  const { selectedSede } = useStore();
   const { data: routines, isLoading } = useQuery({
-    queryKey: ["routines"],
+    queryKey: ["routines", selectedSede.id],
     queryFn: async () => {
-      const routines = await RoutineService.getAllRoutines();
+      const routines = await RoutineService.getAllRoutines(selectedSede.id);
       return routines;
     },
   });

@@ -24,6 +24,18 @@ class UserService {
     return data.users as User[];
   }
 
+  async getAllUsersBySede(token: string | null, sedeId: number) {
+    if (!token) {
+      throw new Error("No authentication token available");
+    }
+
+    const data = await this.apiService.get(
+      `/admin/users?sedeId=${sedeId}`,
+      token
+    );
+    return data.users as User[];
+  }
+
   async updateUserRole(userId: string, role: string, token: string | null) {
     if (!token) {
       throw new Error("No authentication token available");
@@ -43,6 +55,29 @@ class UserService {
     }
 
     await this.apiService.put(`/admin/users/${userId}/plan`, { plan }, token);
+    return true;
+  }
+
+  async updateUserSede(userId: string, sedeId: number, token: string | null) {
+    if (!token) {
+      throw new Error("No authentication token available");
+    }
+
+    try {
+      await this.apiService.put(
+        `/admin/users/${userId}/sede`,
+        { sedeId },
+        token
+      );
+    } catch (error: any) {
+      if (error.status === 400) {
+        throw new Error(
+          "El usuario tiene clases o rutinas asociadas a esta sede"
+        );
+      } else {
+        throw new Error("Error al actualizar la sede del usuario");
+      }
+    }
     return true;
   }
 }
