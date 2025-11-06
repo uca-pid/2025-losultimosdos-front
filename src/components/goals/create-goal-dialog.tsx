@@ -26,13 +26,13 @@ export const CreateGoalDialog: React.FC = () => {
   const handleSubmit = async (values: GoalFormValues) => {
     await createGoalMutation.mutateAsync({
       title: values.title,
-      description: values.description,
+      description: values.description ?? undefined,
       category: values.category,
       targetValue: values.targetValue,
       endDate: values.endDate,
       sedeId: selectedSede.id,
-      targetClassId: values.targetClassId,
-      targetRoutineId: values.targetRoutineId,
+      targetClassId: values.targetClassId ?? undefined,
+      targetRoutineId: values.targetRoutineId ?? undefined,
     });
   };
 
