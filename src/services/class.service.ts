@@ -13,16 +13,18 @@ export type ClassEnrollItem = {
 class ClassService {
   private readonly apiService = apiService;
 
+  async getAllClasses(sedeId: number): Promise<GymClass[]> {
+    const data = await this.apiService.get(`/classes?sedeId=${sedeId}`);
+    return data.items as GymClass[];
+  }
+
   async getEnrollmentsCount(
     upcoming = true,
-    sedeId?: number
+    sedeId: number
   ): Promise<ClassEnrollItem[]> {
-    let qs = upcoming ? "?upcoming=true" : "";
-    if (sedeId !== undefined) {
-      qs += upcoming ? `&sedeId=${sedeId}` : `?sedeId=${sedeId}`;
-    }
-
-    const data = await this.apiService.get(`/classes/enrollments-count${qs}`);
+    const data = await this.apiService.get(
+      `/classes/enrollments-count?upcoming=true&sedeId=${sedeId}`
+    );
     return (data.items ?? []) as ClassEnrollItem[];
   }
 }

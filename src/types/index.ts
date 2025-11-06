@@ -62,3 +62,26 @@ export interface Sede {
   latitude: number;
   longitude: number;
 }
+
+export type GoalCategory =
+  | "CLASS_ENROLLMENTS"
+  | "ROUTINE_ASSIGNMENTS"
+  | "USER_REGISTRATIONS";
+
+export interface Goal {
+  id: number;
+  title: string;
+  description?: string;
+  category: GoalCategory;
+  targetValue: number;
+  currentValue: number;
+  startDate: Date;
+  endDate: Date;
+  sedeId: number;
+  targetClassId?: number;
+  targetClass?: GymClass;
+  targetRoutineId?: number;
+  targetRoutine?: Routine;
+  createdAt: Date;
+  updatedAt: Date;
+}

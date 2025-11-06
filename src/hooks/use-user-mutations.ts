@@ -3,6 +3,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import userService from "@/services/user.service";
 import { toast } from "react-hot-toast";
+import { useStore } from "@/store/useStore";
 
 export const useUserRoleMutation = (userId: string) => {
   const { getToken } = useAuth();
@@ -99,7 +100,7 @@ export const useUserPlanMutation = (userId: string) => {
 export const useUserSedeMutation = (userId: string) => {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
-
+  const { selectedSede } = useStore();
   return useMutation({
     mutationFn: async (newSedeId: number) => {
       const token = await getToken();
@@ -142,6 +143,7 @@ export const useUserSedeMutation = (userId: string) => {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["users", userId] });
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["goals", selectedSede.id] });
     },
   });
 };

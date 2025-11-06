@@ -66,7 +66,7 @@ const UserRoutinesCard = ({ user }: UserRoutinesCardProps) => {
   const { id: userId, sedeId } = user;
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
-  console.log("sedeId", sedeId);
+
   const { data: routines = [], isLoading: isLoadingRoutines } = useQuery<
     (Routine & { exercises: RoutineExercise[] })[]
   >({
@@ -108,6 +108,9 @@ const UserRoutinesCard = ({ user }: UserRoutinesCardProps) => {
         queryClient.setQueryData(["routines"], context.prevRoutines);
       }
       toast.error("Error desasignando la rutina", { id: "unassign-routine" });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals", sedeId] });
     },
   });
 
