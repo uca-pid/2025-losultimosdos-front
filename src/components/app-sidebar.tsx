@@ -23,7 +23,7 @@ import {
 
 import { currentUser } from "@clerk/nextjs/server";
 import { Skeleton } from "./ui/skeleton";
-import { title } from "process";
+import { SedesSwitcher } from "./sedes-switcher";
 
 export async function AppSidebar({
   ...props
@@ -92,6 +92,7 @@ export async function AppSidebar({
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          <SedesSwitcher />
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>

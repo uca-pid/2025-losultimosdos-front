@@ -6,6 +6,7 @@ export interface GymClass {
   time: string;
   capacity: number;
   enrolled: number;
+  sedeId: number;
   createdById: string;
   users: string[];
 }
@@ -19,6 +20,7 @@ export interface User {
   createdAt: string;
   role: "admin" | "user";
   plan: "basic" | "premium";
+  sedeId: number;
 }
 
 export interface Routine {
@@ -51,4 +53,12 @@ export interface RoutineExercise {
   sets?: number;
   reps?: number;
   restTime?: number; // in seconds
+}
+
+export interface Sede {
+  id: number;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
 }

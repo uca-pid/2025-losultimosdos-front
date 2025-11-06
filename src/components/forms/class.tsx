@@ -20,6 +20,7 @@ import {
 import { toast } from "react-hot-toast";
 import { useState } from "react";
 import { ApiValidationError } from "@/services/api.service";
+import { useStore } from "@/store/useStore";
 
 // Schema definition moved outside component for better reusability
 const classFormSchema = z.object({
@@ -49,6 +50,7 @@ const classFormSchema = z.object({
   enrolled: z.number(),
   createdById: z.string(),
   users: z.array(z.string()),
+  sedeId: z.number(),
 });
 
 type ClassFormValues = z.infer<typeof classFormSchema>;
@@ -66,6 +68,8 @@ export const ClassForm = ({
   isEdit = false,
 }: ClassFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const { selectedSede } = useStore();
+
   const form = useForm<ClassFormValues>({
     resolver: zodResolver(classFormSchema),
     defaultValues: {
@@ -78,6 +82,7 @@ export const ClassForm = ({
       date: defaultValues?.date ? new Date(defaultValues.date) : undefined,
       time: defaultValues?.time || "",
       capacity: defaultValues?.capacity || 1,
+      sedeId: selectedSede.id,
     },
   });
 

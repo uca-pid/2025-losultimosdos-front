@@ -12,13 +12,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useUsers } from "@/hooks/use-users";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useStore } from "@/store/useStore";
+import userService from "@/services/user.service";
+import { useAuth } from "@clerk/nextjs";
 type ViewKey = "members" | "classes" | "hours" | "routines";
 
 const AdminPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const view = searchParams.get("view") as ViewKey;
-
+  const { selectedSede } = useStore();
+  const { getToken } = useAuth();
   useEffect(() => {
     if (!searchParams.get("view")) {
       const params = new URLSearchParams(searchParams);
@@ -28,18 +32,29 @@ const AdminPage = () => {
   }, [searchParams, router]);
 
   const { data: busiestHourData, isLoading: isLoadingBusiestHour } = useQuery({
-    queryKey: ["busiest-hour"],
+    queryKey: ["busiest-hour", selectedSede.id],
     queryFn: async () => {
-      const json = await apiService.get("/classes/busiest-hour?upcoming=true");
-      const top = json.top as { hour: string; total: number } | null;
-      return top ? `${top.hour}:00` : "Sin datos";
+      const json = await apiService.get(`/classes/busiest-hour?upcoming=true`);
+      const items = json.items.filter(
+        (item: { sedeId: number }) => item.sedeId === selectedSede.id
+      );
+
+      if (!items || items.length === 0) {
+        return "Sin clases";
+      }
+
+      let max = items[0].hours[0];
+      for (let i = 1; i < items.length; i++) {
+        if (items[i].hours[0].total > max.total) max = items[i].hours[0];
+      }
+      return `${max.hour}:00`;
     },
   });
 
   const { data: topRoutineData, isLoading: isLoadingTopRoutine } = useQuery({
-    queryKey: ["top-routine"],
+    queryKey: ["top-routine", selectedSede.id],
     queryFn: async () => {
-      const items = await RoutineService.getRoutinesUsersCount();
+      const items = await RoutineService.getRoutinesUsersCount(selectedSede.id);
 
       if (!items || items.length === 0) {
         return "Sin rutinas";
@@ -54,9 +69,12 @@ const AdminPage = () => {
   });
 
   const { data: topClassData, isLoading: isLoadingTopClass } = useQuery({
-    queryKey: ["top-class"],
+    queryKey: ["top-class", selectedSede.id],
     queryFn: async () => {
-      const items = await ClassService.getEnrollmentsCount(true);
+      const items = await ClassService.getEnrollmentsCount(
+        true,
+        selectedSede.id
+      );
 
       if (!items || items.length === 0) {
         return "Sin clases";
@@ -70,7 +88,18 @@ const AdminPage = () => {
     },
   });
 
-  const { data: users, isLoading: isLoadingUsers } = useUsers();
+  // const { data: users, isLoading: isLoadingUsers } = useUsers();
+  const { data: users, isLoading: isLoadingUsers } = useQuery({
+    queryKey: ["users-by-sede", selectedSede.id],
+    queryFn: async () => {
+      const token = await getToken();
+      if (!token) {
+        throw new Error("No authentication token available");
+      }
+      const data = await userService.getAllUsersBySede(token, selectedSede.id);
+      return data;
+    },
+  });
 
   const busiestHour = busiestHourData ?? "—";
   const topRoutineName = topRoutineData ?? "—";
@@ -170,20 +199,24 @@ const AdminPage = () => {
         />
       </div>
 
-      <div className="rounded-2xl border bg-background p-3 shadow-sm h-[420px] overflow-hidden">
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-medium text-muted-foreground">
-            {view === "members"
-              ? "Socios (evolución)"
-              : view === "classes"
-              ? "Clases (asistencia)"
-              : view === "hours"
-              ? "Ocupación por hora"
-              : "Inscripción por rutina"}
-          </p>
+      {view === "routines" ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-[420px]">
+          {renderChart()}
         </div>
-        <div className="h-[calc(100%-2rem)]">{renderChart()}</div>
-      </div>
+      ) : (
+        <div className="rounded-2xl border bg-background p-3 shadow-sm h-[420px] overflow-hidden">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-sm font-medium text-muted-foreground">
+              {view === "members"
+                ? "Socios (evolución)"
+                : view === "classes"
+                ? "Clases (asistencia)"
+                : "Ocupación por hora"}
+            </p>
+          </div>
+          <div className="h-[calc(100%-2rem)]">{renderChart()}</div>
+        </div>
+      )}
     </div>
   );
 };

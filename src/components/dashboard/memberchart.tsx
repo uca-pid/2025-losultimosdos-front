@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import apiService from "@/services/api.service";
 import { useQuery } from "@tanstack/react-query";
+import { useStore } from "@/store/useStore";
 
 const chartConfig = {
   visitors: {
@@ -44,13 +45,15 @@ const chartConfig = {
 
 export function ChartArea() {
   const [timeRange, setTimeRange] = React.useState("90d");
-
+  const { selectedSede } = useStore();
   const { data: chartData } = useQuery<
     { date: string; basic: number; premium: number }[]
   >({
-    queryKey: ["users-chart-data"],
+    queryKey: ["users-chart-data", selectedSede.id],
     queryFn: async () => {
-      const res = await apiService.get("/daily-user-count");
+      const res = await apiService.get(
+        `/daily-user-count?sedeId=${selectedSede.id}`
+      );
       return res.data.sort(
         (a: { date: string }, b: { date: string }) =>
           new Date(a.date).getTime() - new Date(b.date).getTime()

@@ -24,6 +24,18 @@ class UserService {
     return data.users as User[];
   }
 
+  async getAllUsersBySede(token: string | null, sedeId: number) {
+    if (!token) {
+      throw new Error("No authentication token available");
+    }
+
+    const data = await this.apiService.get(
+      `/admin/users?sedeId=${sedeId}`,
+      token
+    );
+    return data.users as User[];
+  }
+
   async updateUserRole(userId: string, role: string, token: string | null) {
     if (!token) {
       throw new Error("No authentication token available");

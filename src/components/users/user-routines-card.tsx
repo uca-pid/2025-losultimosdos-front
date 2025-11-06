@@ -33,6 +33,7 @@ import React from "react";
 import { ICON_OPTIONS } from "../forms/routine";
 import { Activity } from "lucide-react";
 import AvailableRoutinesModal from "../routines/routines-modal";
+import { User } from "@/types";
 
 interface UserRoutine {
   id: number;
@@ -43,7 +44,7 @@ interface UserRoutine {
 }
 
 interface UserRoutinesCardProps {
-  userId: string;
+  user: User;
 }
 
 const useIsMobile = (query = "(max-width: 640px)") => {
@@ -60,18 +61,22 @@ const useIsMobile = (query = "(max-width: 640px)") => {
   return isMobile;
 };
 
-const UserRoutinesCard = ({ userId }: UserRoutinesCardProps) => {
+const UserRoutinesCard = ({ user }: UserRoutinesCardProps) => {
   const isMobile = useIsMobile();
-
+  const { id: userId, sedeId } = user;
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
+  console.log("sedeId", sedeId);
   const { data: routines = [], isLoading: isLoadingRoutines } = useQuery<
     (Routine & { exercises: RoutineExercise[] })[]
   >({
-    queryKey: ["routines"],
+    queryKey: ["routines", sedeId],
     queryFn: async () => {
       const token = await getToken();
-      const response = await apiService.get(`/routines`, token!);
+      const response = await apiService.get(
+        `/routines?sedeId=${sedeId}`,
+        token!
+      );
       return response.items || [];
     },
   });

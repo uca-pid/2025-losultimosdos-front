@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 
 import {
@@ -18,83 +19,105 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { TrendingUp } from "lucide-react";
+import { useStore } from "@/store/useStore";
+import apiService from "@/services/api.service";
 
 export const description = "A line chart with dots";
 
-type Bucket = { hour: string; total: number };
+type SedeHours = {
+  sedeId: number;
+  sedeName: string;
+  hours: { hour: string; total: number }[];
+};
+
+type ChartDataPoint = {
+  hour: string;
+  [key: string]: number | string;
+};
 
 const HOURS: string[] = Array.from({ length: 13 }, (_, i) =>
   String(8 + i).padStart(2, "0")
 );
 
-const chartConfig = {
-  Inscriptos: {
-    label: "Inscriptos",
-    color: "var(--chart-1)",
-  },
-} satisfies ChartConfig;
-
 export function ChartLine() {
-  const [data, setData] = useState<{ hour: string; Inscriptos: number }[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [top, setTop] = useState<Bucket | null>(null);
+  const { selectedSede } = useStore();
+  const {
+    data: queryData,
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: ["class-busiest-hour"],
+    queryFn: async () => {
+      const json: { items: SedeHours[] } = await apiService.get(
+        `/classes/busiest-hour?upcoming=true`
+      );
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        setLoading(true);
-        setError(null);
+      const sedes = json.items ?? [];
 
-        const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+      // Create chart data with all hours and all sedes
+      const chartData: ChartDataPoint[] = HOURS.map((hour) => {
+        const dataPoint: ChartDataPoint = { hour };
 
-        const res = await fetch(`${base}/classes/busiest-hour?upcoming=true`);
-        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-        const json: { items: Bucket[]; top: Bucket | null } = await res.json();
-
-        const totals = new Map<string, number>();
-        (json.items ?? []).forEach((b) => {
-          const h = (b.hour ?? "").toString().padStart(2, "0");
-          totals.set(h, (totals.get(h) ?? 0) + (b.total ?? 0));
+        sedes.forEach((sede) => {
+          const sedeKey = `sede_${sede.sedeId}`;
+          const hourData = sede.hours.find(
+            (h) => h.hour.padStart(2, "0") === hour
+          );
+          dataPoint[sedeKey] = hourData?.total ?? 0;
         });
 
-        const rows = HOURS.map((h) => ({
-          hour: h,
-          Inscriptos: totals.get(h) ?? 0,
-        }));
+        return dataPoint;
+      });
 
-        if (!mounted) return;
-        setData(rows);
-        setTop(json.top ?? null);
-      } catch (e: any) {
-        if (!mounted) return;
-        setError(e?.message ?? "Error al cargar datos");
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+      return { chartData, sedes };
+    },
+  });
 
-  const allZero = useMemo(
-    () => data.length > 0 && data.every((d) => d.Inscriptos === 0),
-    [data]
-  );
+  const chartData = queryData?.chartData ?? [];
+  const sedes = queryData?.sedes ?? [];
+
+  // Build dynamic chart config
+  const chartConfig = useMemo(() => {
+    const config: ChartConfig = {};
+
+    sedes.forEach((sede) => {
+      const sedeKey = `sede_${sede.sedeId}`;
+      const isSelected = sede.sedeId === selectedSede.id;
+
+      config[sedeKey] = {
+        label: sede.sedeName,
+        color: isSelected ? "var(--chart-2)" : "var(--chart-1)",
+      };
+    });
+
+    return config;
+  }, [sedes, selectedSede.id]);
+
+  const allZero = useMemo(() => {
+    if (chartData.length === 0) return true;
+
+    return chartData.every((point) => {
+      return sedes.every((sede) => {
+        const sedeKey = `sede_${sede.sedeId}`;
+        return (point[sedeKey] as number) === 0;
+      });
+    });
+  }, [chartData, sedes]);
 
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle>Inscripciones por hora</CardTitle>
-        <CardDescription>Próximas clases · 08–20 hs</CardDescription>
+        <CardDescription>
+          Próximas clases · 08–20 hs · Todas las sedes
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="flex-1 min-h-0">
         {error ? (
-          <div className="pt-6 text-sm text-destructive">{error}</div>
+          <div className="pt-6 text-sm text-destructive">
+            {error instanceof Error ? error.message : "Error al cargar datos"}
+          </div>
         ) : loading ? (
           <div className="pt-6 text-sm text-muted-foreground">
             Cargando datos…
@@ -107,7 +130,7 @@ export function ChartLine() {
           <ChartContainer config={chartConfig} className="h-full w-full">
             <LineChart
               accessibilityLayer
-              data={data}
+              data={chartData}
               margin={{ left: 12, right: 12, top: 8, bottom: 8 }}
             >
               <CartesianGrid vertical={false} />
@@ -116,20 +139,26 @@ export function ChartLine() {
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                tickFormatter={(v: string) => v} 
+                tickFormatter={(v: string) => v}
               />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              <Line
-                dataKey="Inscriptos"
-                type="natural"
-                stroke="var(--color-Inscriptos)"
-                strokeWidth={2}
-                dot={{ fill: "var(--color-Inscriptos)" }}
-                activeDot={{ r: 6 }}
-              />
+              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              {sedes.map((sede) => {
+                const sedeKey = `sede_${sede.sedeId}`;
+                const isSelected = sede.sedeId === selectedSede.id;
+
+                return (
+                  <Line
+                    key={sedeKey}
+                    dataKey={sedeKey}
+                    type="natural"
+                    stroke={`var(--color-${sedeKey})`}
+                    strokeWidth={isSelected ? 3 : 2}
+                    dot={{ fill: `var(--color-${sedeKey})` }}
+                    activeDot={{ r: 6 }}
+                    opacity={isSelected ? 1 : 0.4}
+                  />
+                );
+              })}
             </LineChart>
           </ChartContainer>
         )}
