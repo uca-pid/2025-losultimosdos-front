@@ -44,10 +44,16 @@ const UsersActionColumn = ({ row }: { row: Row<GymClass> }) => {
         { id: "enroll-class" }
       );
       router.refresh();
-    } catch (error) {
-      toast.error("Hubo un error al procesar tu solicitud", {
-        id: "enroll-class",
-      });
+    } catch (error: any) {
+      if (error.status === 403) {
+        toast.error("Con el plan básico solo puedes inscribirte en 3 clases", {
+          id: "enroll-class",
+        });
+      } else {
+        toast.error("Hubo un error al procesar tu solicitud", {
+          id: "enroll-class",
+        });
+      }
     } finally {
       setIsLoading(false);
     }

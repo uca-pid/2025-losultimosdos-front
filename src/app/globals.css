@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@clerk/themes/shadcn.css";
+@import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -17,6 +18,11 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-chart-10: var(--chart-10);
+  --color-chart-9: var(--chart-9);
+  --color-chart-8: var(--chart-8);
+  --color-chart-7: var(--chart-7);
+  --color-chart-6: var(--chart-6);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -94,6 +100,11 @@
   --chart-3: oklch(0.5778 0.0759 254.1573);
   --chart-4: oklch(0.5016 0.0849 259.4902);
   --chart-5: oklch(0.4241 0.0952 264.0306);
+  --chart-6: oklch(0.75 0.15 150);
+  --chart-7: oklch(0.7 0.18 280);
+  --chart-8: oklch(0.72 0.14 320);
+  --chart-9: oklch(0.68 0.16 60);
+  --chart-10: oklch(0.65 0.13 200);
   --sidebar: oklch(0.903 0.0046 258.3257);
   --sidebar-foreground: oklch(0.3211 0 0);
   --sidebar-primary: oklch(0.6397 0.172 36.4421);
@@ -154,6 +165,11 @@
   --chart-3: oklch(0.5778 0.0759 254.1573);
   --chart-4: oklch(0.5016 0.0849 259.4902);
   --chart-5: oklch(0.4241 0.0952 264.0306);
+  --chart-6: oklch(0.7 0.15 150);
+  --chart-7: oklch(0.65 0.18 280);
+  --chart-8: oklch(0.68 0.14 320);
+  --chart-9: oklch(0.63 0.16 60);
+  --chart-10: oklch(0.6 0.13 200);
   --sidebar: oklch(0.31 0.0283 267.7408);
   --sidebar-foreground: oklch(0.9219 0 0);
   --sidebar-primary: oklch(0.6397 0.172 36.4421);
@@ -198,4 +214,9 @@
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
   }
+}
+
+/* Leaflet map marker styling */
+.existing-sede-marker {
+  filter: hue-rotate(220deg) saturate(1.2);
 }

@@ -13,6 +13,7 @@ const UserInfoPage = () => {
 
   const { data: user, isLoading, error, isPending } = useUser(userId);
 
+  console.log("user", user);
   if (isLoading || isPending) {
     return (
       <div className="container mx-auto space-y-6 p-4">
@@ -46,8 +47,8 @@ const UserInfoPage = () => {
 
       <div className="grid gap-6">
         <UserDataCard user={user} />
-        <UserClassesCard userId={userId} />
-        <UserRoutinesCard userId={userId} />
+        <UserClassesCard user={user} />
+        <UserRoutinesCard user={user} />
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Badge } from "../ui/badge";
 import Link from "next/link";
 import { User } from "@/types";
+import { getPlanBadgeColor } from "@/lib/user-utils";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -52,6 +53,21 @@ export const columns: ColumnDef<User>[] = [
         >
           {row.original.role.charAt(0).toUpperCase() +
             row.original.role.slice(1)}
+        </Badge>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "plan",
+    header: "Plan",
+    cell: ({ row }) => (
+      <div className="flex gap-2">
+        <Badge
+          variant="outline"
+          className={getPlanBadgeColor(row.original.plan)}
+        >
+          {row.original.plan.charAt(0).toUpperCase() +
+            row.original.plan.slice(1)}
         </Badge>
       </div>
     ),

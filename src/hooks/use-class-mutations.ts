@@ -3,6 +3,7 @@ import { GymClass } from "@/types";
 import { useAuth } from "@clerk/nextjs";
 import apiService from "@/services/api.service";
 import { toast } from "react-hot-toast";
+import { useStore } from "@/store/useStore";
 
 interface MutationContext {
   prevUserClasses?: GymClass[];
@@ -12,7 +13,7 @@ interface MutationContext {
 export const useEnrollClass = (userId: string, onSuccess?: () => void) => {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
-
+  const { selectedSede } = useStore();
   return useMutation<GymClass, Error, GymClass, MutationContext>({
     mutationFn: async (classItem: GymClass) => {
       const token = await getToken();
@@ -28,6 +29,7 @@ export const useEnrollClass = (userId: string, onSuccess?: () => void) => {
       await queryClient.cancelQueries({ queryKey: ["userClasses", userId] });
       await queryClient.cancelQueries({ queryKey: ["classes"] });
 
+      toast.loading("Asignando clase...", { id: "enroll-class" });
       const prevUserClasses = queryClient.getQueryData<GymClass[]>([
         "userClasses",
         userId,
@@ -47,9 +49,11 @@ export const useEnrollClass = (userId: string, onSuccess?: () => void) => {
         )
       );
 
-      toast.success("Clase asignada correctamente", { id: "enroll-class" });
-      onSuccess?.();
       return { prevUserClasses, prevClasses };
+    },
+
+    onSuccess: () => {
+      toast.success("Clase asignada correctamente", { id: "enroll-class" });
     },
 
     onError: (err, classItem, context) => {
@@ -62,12 +66,20 @@ export const useEnrollClass = (userId: string, onSuccess?: () => void) => {
       if (context?.prevClasses) {
         queryClient.setQueryData(["classes"], context.prevClasses);
       }
-      toast.error("Error al asignar la clase", { id: "enroll-class" });
+      console.log("err", err);
+      if ((err as any).status === 403) {
+        toast.error("El usuario ya esta inscrito en el maximo de clases", {
+          id: "enroll-class",
+        });
+      } else {
+        toast.error("Error al asignar la clase", { id: "enroll-class" });
+      }
     },
 
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["userClasses", userId] });
       queryClient.invalidateQueries({ queryKey: ["classes"] });
+      queryClient.invalidateQueries({ queryKey: ["goals", selectedSede.id] });
     },
   });
 };
@@ -75,7 +87,7 @@ export const useEnrollClass = (userId: string, onSuccess?: () => void) => {
 export const useUnenrollClass = (userId: string) => {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
-
+  const { selectedSede } = useStore();
   return useMutation<GymClass, Error, GymClass, MutationContext>({
     mutationFn: async (classItem: GymClass) => {
       const token = await getToken();
@@ -114,11 +126,13 @@ export const useUnenrollClass = (userId: string) => {
         )
       );
 
+      return { prevUserClasses, prevClasses };
+    },
+
+    onSuccess: () => {
       toast.success("Clase desasignada correctamente", {
         id: "unenroll-class",
       });
-
-      return { prevUserClasses, prevClasses };
     },
 
     onError: (err, classItem, context) => {
@@ -137,6 +151,7 @@ export const useUnenrollClass = (userId: string) => {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["userClasses", userId] });
       queryClient.invalidateQueries({ queryKey: ["classes"] });
+      queryClient.invalidateQueries({ queryKey: ["goals", selectedSede.id] });
     },
   });
 };

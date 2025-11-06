@@ -3,9 +3,28 @@ import apiService from "./api.service";
 
 class RoutineService {
   private readonly apiService = apiService;
-  async getAllRoutines() {
-    const data = await this.apiService.get("/routines");
+  async getAllRoutines(sedeId: number) {
+    const data = await this.apiService.get(`/routines?sedeId=${sedeId}`);
     return data.items as (Routine & { exercises: RoutineExercise[] })[];
+  }
+  async getRoutinesUsersCount(sedeId: number) {
+    const data = await this.apiService.get(
+      `/routines/users-count?sedeId=${sedeId}`
+    );
+    return (data.items ?? []) as {
+      name: string;
+      usersCount: number;
+      sede: { id: number; name: string };
+    }[];
+  }
+
+  async getAllRoutinesUsersCount() {
+    const data = await this.apiService.get(`/routines/users-count`);
+    return (data.items ?? []) as {
+      name: string;
+      usersCount: number;
+      sede: { id: number; name: string };
+    }[];
   }
 
   async createRoutine(

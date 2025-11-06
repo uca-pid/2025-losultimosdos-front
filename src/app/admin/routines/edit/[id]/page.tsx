@@ -8,6 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import RoutineSkeleton from "@/components/skeletons/routine-skeleton";
 import { toast } from "react-hot-toast";
+import { useStore } from "@/store/useStore";
 
 const transformRoutineData = (routineData: any) => {
   return {
@@ -17,6 +18,7 @@ const transformRoutineData = (routineData: any) => {
     level: routineData.level as "Beginner" | "Intermediate" | "Advanced",
     duration: routineData.duration,
     icon: routineData.icon,
+    sedeId: routineData.sedeId,
     exercises: routineData.exercises.map((ex: any) => ({
       exerciseId: ex.exerciseId,
       sets: ex.sets,
@@ -43,6 +45,7 @@ const EditRoutinePage = () => {
   const router = useRouter();
   const { id } = useParams();
   const idNumber = parseInt(id as string);
+  const { selectedSede } = useStore();
   const { data: defaultValues, isLoading } = useQuery<
     Routine & { exercises: RoutineExercise[] }
   >({
@@ -82,13 +85,10 @@ const EditRoutinePage = () => {
       return updatedRoutine;
     },
     onMutate: async (newRoutine) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ["routine", id] });
 
-      // Snapshot the previous value
       const previousRoutine = queryClient.getQueryData(["routine", id]);
 
-      // Optimistically update to the new value
       queryClient.setQueryData(["routine", id], {
         id: idNumber,
         name: newRoutine.name,
@@ -116,7 +116,7 @@ const EditRoutinePage = () => {
     },
     onSuccess: (updatedRoutine) => {
       queryClient.setQueryData(["routine", id], updatedRoutine);
-      queryClient.refetchQueries({ queryKey: ["routines"] });
+      queryClient.refetchQueries({ queryKey: ["routines", selectedSede.id] });
       toast.success("Rutina actualizada correctamente");
     },
     onError: (error, newRoutine, context) => {

@@ -34,6 +34,7 @@ import {
   Heart,
   type LucideIcon,
 } from "lucide-react";
+import { useStore } from "@/store/useStore";
 
 export const ICON_OPTIONS: {
   value: string;
@@ -90,6 +91,7 @@ export const routineFormSchema = z.object({
   exercises: z
     .array(routineExerciseSchema)
     .min(1, "La rutina debe tener al menos un ejercicio"),
+  sedeId: z.number(),
 });
 export type RoutineFormValues = z.infer<typeof routineFormSchema>;
 interface RoutineFormProps {
@@ -105,8 +107,8 @@ export const RoutineForm = ({
   isEdit = false,
   isEditing = false,
 }: RoutineFormProps) => {
-  console.log("defaultValues", defaultValues);
   const [isLoading, setIsLoading] = useState(false);
+  const { selectedSede } = useStore();
   const form = useForm<RoutineFormValues>({
     resolver: zodResolver(routineFormSchema),
     defaultValues: defaultValues || {
@@ -116,6 +118,7 @@ export const RoutineForm = ({
       duration: 4,
       icon: "",
       exercises: [],
+      sedeId: selectedSede.id,
     },
   });
   const handleSubmit = async (values: RoutineFormValues) => {
@@ -179,10 +182,15 @@ export const RoutineForm = ({
                   <FormItem>
                     <FormLabel>Nivel</FormLabel>
                     <FormControl>
-                      <Select {...field}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un nivel" />
-                        </SelectTrigger>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona un nivel" />
+                          </SelectTrigger>
+                        </FormControl>
                         <SelectContent>
                           <SelectItem value="Beginner">Principiante</SelectItem>
                           <SelectItem value="Intermediate">

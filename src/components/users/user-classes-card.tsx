@@ -23,9 +23,10 @@ import {
 } from "../ui/table";
 import AvailableClassesModal from "../classes/available-classes-modal";
 import { useUnenrollClass } from "@/hooks/use-class-mutations";
+import { User } from "@/types";
 
 interface UserClassesCardProps {
-  userId: string;
+  user: User;
 }
 
 const useIsMobile = (query = "(max-width: 640px)") => {
@@ -42,30 +43,33 @@ const useIsMobile = (query = "(max-width: 640px)") => {
   return isMobile;
 };
 
-const UserClassesCard = ({ userId }: UserClassesCardProps) => {
+const UserClassesCard = ({ user }: UserClassesCardProps) => {
+  const { id: userId, sedeId } = user;
   const isMobile = useIsMobile();
   const { getToken } = useAuth();
+  const [unenrollingClassId, setUnenrollingClassId] = useState<number | null>(
+    null
+  );
   const { data: userClasses = [], isLoading: isLoadingClasses } = useQuery({
-    queryKey: ["userClasses", userId],
+    queryKey: ["userClasses", user.id],
     queryFn: async () => {
       const token = await getToken();
       const response = await apiService.get(
-        `/admin/users/${userId}/classes`,
+        `/admin/users/${userId}/classes?sedeId=${sedeId}`,
         token!
       );
       return response.classes || [];
     },
   });
 
-  const { mutate: unenrollClass, isPending: isUnenrolling } =
-    useUnenrollClass(userId);
+  const { mutate: unenrollClass } = useUnenrollClass(userId);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Clases del Usuario</CardTitle>
         <CardAction>
-          <AvailableClassesModal userId={userId} />
+          <AvailableClassesModal user={user} />
         </CardAction>
       </CardHeader>
       <CardContent>
@@ -114,10 +118,17 @@ const UserClassesCard = ({ userId }: UserClassesCardProps) => {
                       variant="destructive"
                       size="sm"
                       className="w-full"
-                      onClick={() => unenrollClass(c)}
-                      disabled={isUnenrolling}
+                      onClick={() => {
+                        setUnenrollingClassId(c.id);
+                        unenrollClass(c, {
+                          onSettled: () => setUnenrollingClassId(null),
+                        });
+                      }}
+                      disabled={unenrollingClassId === c.id}
                     >
-                      {isUnenrolling ? "Cancelando..." : "Cancelar inscripción"}
+                      {unenrollingClassId === c.id
+                        ? "Cancelando..."
+                        : "Cancelar inscripción"}
                     </Button>
                   </div>
                 </div>
@@ -166,10 +177,15 @@ const UserClassesCard = ({ userId }: UserClassesCardProps) => {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => unenrollClass(c)}
-                        disabled={isUnenrolling}
+                        onClick={() => {
+                          setUnenrollingClassId(c.id);
+                          unenrollClass(c, {
+                            onSettled: () => setUnenrollingClassId(null),
+                          });
+                        }}
+                        disabled={unenrollingClassId === c.id}
                       >
-                        {isUnenrolling
+                        {unenrollingClassId === c.id
                           ? "Cancelando..."
                           : "Cancelar inscripción"}
                       </Button>

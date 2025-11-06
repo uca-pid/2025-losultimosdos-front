@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { type ColumnDef } from "@tanstack/react-table";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -29,6 +29,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "react-hot-toast";
 import routineService from "@/services/routine.service";
+import { useStore } from "@/store/useStore";
 
 const ICONS: Record<string, LucideIcon> = {
   activity: Activity,
@@ -49,6 +50,11 @@ const AdminRoutineTable = ({
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const { getToken } = useAuth();
   const router = useRouter();
+  const { selectedSede } = useStore();
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    setRoutines(initialRoutines);
+  }, [initialRoutines]);
 
   const { mutate: deleteRoutine, isPending: isDeleting } = useMutation({
     mutationFn: async (id: number) => {
@@ -67,6 +73,7 @@ const AdminRoutineTable = ({
     onSuccess: () => {
       setDeletingId(null);
       router.refresh();
+      queryClient.refetchQueries({ queryKey: ["routines", selectedSede.id] });
     },
     onError: (error) => {
       // Revert the optimistic update on error
@@ -89,18 +96,26 @@ const AdminRoutineTable = ({
           <Button
             variant="destructive"
             onClick={() => deleteRoutine(row.original.id as number)}
-            disabled={isDeleting || deletingId === row.original.id}
+            disabled={deletingId === row.original.id}
             className="cursor-pointer disabled:cursor-not-allowed w-28"
           >
-            {isDeleting || deletingId === row.original.id
-              ? "Eliminando"
-              : "Eliminar"}
+            {deletingId === row.original.id ? "Eliminando" : "Eliminar"}
           </Button>
         </div>
       ),
     },
   ];
 
+  const translateLevel = (level: string) => {
+    switch (level) {
+      case "Beginner":
+        return "Principiante";
+      case "Intermediate":
+        return "Intermedio";
+      case "Advanced":
+        return "Avanzado";
+    }
+  };
   return (
     <>
       <div className="hidden sm:block">
@@ -162,7 +177,7 @@ const AdminRoutineTable = ({
 
                   <div className="text-gray-500 dark:text-gray-400">Nivel</div>
                   <div className="text-right text-gray-900 dark:text-gray-100">
-                    {rt.level ?? "-"}
+                    {translateLevel(rt.level) ?? "-"}
                   </div>
 
                   <div className="text-gray-500 dark:text-gray-400">

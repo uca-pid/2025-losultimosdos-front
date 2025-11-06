@@ -21,13 +21,15 @@ export class ApiService {
     body: Record<string, unknown>,
     token: string
   ): Promise<T> {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    };
+
     const response = await fetch(this.baseUrl + endpoint, {
       method: "POST",
       body: JSON.stringify(body),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
+      headers,
     });
     if (response.status >= 500) {
       console.log(response.body, response.status);
@@ -42,11 +44,15 @@ export class ApiService {
   }
 
   async get(endpoint: string, token?: string) {
-    const response = await fetch(this.baseUrl + endpoint, {
+    const headers = {
+      Authorization: token ? "Bearer " + token : "",
+    };
+    const normalizedEndpoint = endpoint.startsWith("/")
+      ? endpoint
+      : `/${endpoint}`;
+    const response = await fetch(`${this.baseUrl}${normalizedEndpoint}`, {
       method: "GET",
-      headers: {
-        Authorization: token ? "Bearer " + token : "",
-      },
+      headers,
     });
     if (response.status >= 500) {
       console.log(response.body, response.status);
@@ -59,12 +65,12 @@ export class ApiService {
     return data;
   }
 
-  async put(
+  async put<T = any>(
     endpoint: string,
     body: Record<string, unknown>,
     token: string,
     additionalHeaders?: Record<string, string>
-  ) {
+  ): Promise<T> {
     const headers = {
       "Content-Type": "application/json",
       Authorization: "Bearer " + token,
@@ -74,16 +80,19 @@ export class ApiService {
     const response = await fetch(this.baseUrl + endpoint, {
       method: "PUT",
       body: JSON.stringify(body),
-      headers: headers,
+      headers,
     });
+
     if (response.status >= 500) {
       console.log(response.body, response.status);
       throw new Error("Server error");
     } else if (response.status >= 400) {
       const { error, details } = await response.json();
+      console.log("error", error, details);
       throw new ApiValidationError(details, response.status);
     }
-    return response;
+    const data = await response.json();
+    return data;
   }
 
   async delete(endpoint: string, token: string) {
@@ -93,13 +102,13 @@ export class ApiService {
     };
     const response = await fetch(this.baseUrl + endpoint, {
       method: "DELETE",
-      headers: headers,
+      headers,
     });
     if (response.status >= 500) {
       console.log(response.body, response.status);
       throw new Error("Server error");
     } else if (response.status >= 400) {
-      const { error, details } = await response.json();
+      const { error, details, message } = await response.json();
       throw new ApiValidationError(details, response.status);
     }
     return response;

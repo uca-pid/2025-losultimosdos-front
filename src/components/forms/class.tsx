@@ -20,6 +20,7 @@ import {
 import { toast } from "react-hot-toast";
 import { useState } from "react";
 import { ApiValidationError } from "@/services/api.service";
+import { useStore } from "@/store/useStore";
 
 // Schema definition moved outside component for better reusability
 const classFormSchema = z.object({
@@ -33,7 +34,15 @@ const classFormSchema = z.object({
     today.setHours(0, 0, 0, 0);
     return date >= today;
   }, "La fecha tiene que ser en el futuro"),
-  time: z.string(),
+  time: z.string().refine(
+    (time) => {
+      const [hours, minutes] = time.split(":").map(Number);
+      return hours >= 8 && hours < 21;
+    },
+    {
+      message: "La hora tiene que ser entre las 8:00 y 21:00",
+    }
+  ),
   capacity: z
     .number("La capacidad debe ser un número")
     .min(1, "La capacidad debe ser al menos 1")
@@ -41,6 +50,7 @@ const classFormSchema = z.object({
   enrolled: z.number(),
   createdById: z.string(),
   users: z.array(z.string()),
+  sedeId: z.number(),
 });
 
 type ClassFormValues = z.infer<typeof classFormSchema>;
@@ -58,6 +68,8 @@ export const ClassForm = ({
   isEdit = false,
 }: ClassFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const { selectedSede } = useStore();
+
   const form = useForm<ClassFormValues>({
     resolver: zodResolver(classFormSchema),
     defaultValues: {
@@ -70,6 +82,7 @@ export const ClassForm = ({
       date: defaultValues?.date ? new Date(defaultValues.date) : undefined,
       time: defaultValues?.time || "",
       capacity: defaultValues?.capacity || 1,
+      sedeId: selectedSede.id,
     },
   });
 
