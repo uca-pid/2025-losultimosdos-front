@@ -1,6 +1,7 @@
 import { Routine, RoutineExercise } from "@/types";
 import apiService from "./api.service";
 
+
 class RoutineService {
   private readonly apiService = apiService;
   async getAllRoutines(sedeId: number) {
