@@ -18,9 +18,17 @@ export interface User {
   email: string;
   imageUrl: string;
   createdAt: string;
-  role: "admin" | "user";
+  role: "admin" | "user" | "medibook";
   plan: "basic" | "premium";
   sedeId: number;
+}
+
+export interface ApiKey {
+  id: string;
+  key: string;
+  isActive: boolean;
+  createdAt: string;
+  lastUsed?: string;
 }
 
 export interface Routine {
