@@ -1,7 +1,7 @@
 // src/hooks/useCurrentUserRole.ts
 import { useUser } from "@clerk/clerk-react";
 
-export function useCurrentUserRole(): "admin" | "user" | null {
+export function useCurrentUserRole(): "admin" | "user" | "medibook" | null {
   const { user, isLoaded } = useUser();
 
   if (!isLoaded || !user) {
@@ -9,5 +9,5 @@ export function useCurrentUserRole(): "admin" | "user" | null {
   }
 
   // Ensure publicMetadata.role is typed correctly
-  return (user.publicMetadata?.role as "admin" | "user") || null;
+  return (user.publicMetadata?.role as "admin" | "user" | "medibook") || null;
 }

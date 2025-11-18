@@ -8,10 +8,12 @@ export default async function Page() {
   if (!isAuthenticated) return redirectToSignIn();
 
   const isAdmin = user?.publicMetadata?.role === "admin";
+  const isUser = user?.publicMetadata?.role === "user";
+  const isMedibook = user?.publicMetadata?.role === "medibook";
 
-  if (isAdmin) {
-    return redirect("/admin/classes");
-  } else {
-    return redirect("/user/classes");
-  }
+  if (isAdmin) return redirect("/admin/classes");
+  if (isUser) return redirect("/user/classes");
+  if (isMedibook) return redirect("/medibook/api-key");
+
+  return redirect("/");
 }

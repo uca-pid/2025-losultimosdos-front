@@ -7,6 +7,7 @@ import {
   IconDashboard,
   IconHome,
   IconTarget,
+  IconKey,
 } from "@tabler/icons-react";
 import { Dumbbell } from "lucide-react";
 
@@ -74,6 +75,12 @@ export async function AppSidebar({
         url: "/" + user?.publicMetadata?.role + "/exercises",
         icon: IconAd,
         roles: ["admin"],
+      },
+      {
+        title: "Clave API",
+        url: "/" + user?.publicMetadata?.role + "/api-key",
+        icon: IconKey,
+        roles: ["medibook"],
       },
     ],
   };
