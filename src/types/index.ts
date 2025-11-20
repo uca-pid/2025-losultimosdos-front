@@ -93,3 +93,19 @@ export interface Goal {
   createdAt: Date;
   updatedAt: Date;
 }
+
+
+export type LeaderboardPeriod = "all" | "30d" | "7d";
+
+export interface UserLeaderboardItem {
+  rank: number;
+  userId: string;
+  totalPoints: number;
+}
+
+export interface SedeLeaderboardItem {
+  rank: number;
+  sedeId: number;
+  sedeName: string;
+  totalPoints: number;
+}

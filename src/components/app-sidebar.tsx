@@ -82,6 +82,18 @@ export async function AppSidebar({
         icon: IconKey,
         roles: ["medibook"],
       },
+      {
+        title: "Gamificación",
+        url: "/" + user?.publicMetadata?.role + "/leaderboard",
+        icon: IconDashboard,
+        roles: ["admin"],
+      },
+      {
+        title: "Mi progreso",
+        url: "/" + user?.publicMetadata?.role + "/gamification",
+        icon: IconTarget,
+        roles: ["user"],
+      },
     ],
   };
 
