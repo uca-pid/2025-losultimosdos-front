@@ -84,7 +84,7 @@ export function UserGamificationSummary() {
       </CardHeader>
 
       <CardContent className="relative space-y-5">
-        {/* Puntos totales + nivel */}
+
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="text-xs font-medium text-muted-foreground uppercase">

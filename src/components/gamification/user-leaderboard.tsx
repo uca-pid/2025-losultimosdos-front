@@ -105,7 +105,7 @@ export function UserLeaderboard({
                       <TableCell>
                         <div className="flex flex-col">
                           <span className="text-sm font-medium">
-                            {isCurrentUser ? "Vos" : item.userId}
+                            {isCurrentUser ? "Vos" : item.user?.fullName ?? item.userId}
                           </span>
                           {isCurrentUser && (
                             <span className="text-[11px] text-blue-600 dark:text-blue-300">

@@ -60,7 +60,7 @@ export interface RoutineExercise {
   exerciseId: number;
   sets?: number;
   reps?: number;
-  restTime?: number; // in seconds
+  restTime?: number; 
 }
 
 export interface Sede {
@@ -94,13 +94,18 @@ export interface Goal {
   updatedAt: Date;
 }
 
-
 export type LeaderboardPeriod = "all" | "30d" | "7d";
 
 export interface UserLeaderboardItem {
   rank: number;
   userId: string;
   totalPoints: number;
+  user?: {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+    fullName: string;
+  };
 }
 
 export interface SedeLeaderboardItem {

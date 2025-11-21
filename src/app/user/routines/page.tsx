@@ -48,9 +48,16 @@ const RoutinesPage = () => {
       header: "Acciones",
       accessorKey: "actions",
       cell: ({ row }) => (
-        <Button asChild>
-          <Link href={`/user/routines/${row.original.id}`}>Ver</Link>
-        </Button>
+        <div className="flex gap-2 justify-end">
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/user/routines/${row.original.id}`}>Ver</Link>
+          </Button>
+          <Button asChild size="sm">
+            <Link href={`/user/routines/${row.original.id}/play`}>
+              Comenzar
+            </Link>
+          </Button>
+        </div>
       ),
     },
   ];
@@ -123,6 +130,22 @@ const RoutinesPage = () => {
                       {rt.description}
                     </p>
                   ) : null}
+
+                  <div className="mt-4 flex gap-2">
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                    >
+                      <Link href={`/user/routines/${rt.id}`}>Ver</Link>
+                    </Button>
+                    <Button asChild size="sm" className="flex-1">
+                      <Link href={`/user/routines/${rt.id}/play`}>
+                        Comenzar
+                      </Link>
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))

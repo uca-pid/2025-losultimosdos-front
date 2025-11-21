@@ -83,7 +83,7 @@ export async function AppSidebar({
         roles: ["medibook"],
       },
       {
-        title: "Gamificación",
+        title: "Leaderboard",
         url: "/" + user?.publicMetadata?.role + "/leaderboard",
         icon: IconDashboard,
         roles: ["admin"],
