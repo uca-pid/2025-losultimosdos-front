@@ -7,7 +7,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { esMX } from "@clerk/localizations";
 import { NewBadgeWatcher } from "@/components/badges/NewBadgeWatcher";
-
+import { LevelUpWatcher } from "@/components/gamification/LevelUpWatcher";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -37,6 +37,7 @@ export default async function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="dark">
             <QueryProvider>
               <NewBadgeWatcher />
+              <LevelUpWatcher />
               {children}
             </QueryProvider>
           </ThemeProvider>

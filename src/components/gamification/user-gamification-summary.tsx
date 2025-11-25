@@ -84,36 +84,36 @@ export function UserGamificationSummary() {
       </CardHeader>
 
       <CardContent className="relative space-y-5">
-
+        {/* Nivel actual */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <div className="text-xs font-medium text-muted-foreground uppercase">
-              Puntos totales
+          <div className="flex items-center gap-3">
+            <div
+              className={cn(
+                "flex h-12 w-12 items-center justify-center rounded-full shadow-md",
+                level.colorClass
+              )}
+            >
+              <span className="text-2xl">{level.icon}</span>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold">
-                {totalPoints.toLocaleString("es-AR")}
-              </span>
-              <Badge
-                variant="secondary"
-                className={cn(
-                  "text-xs px-2 py-0.5",
-                  level.level >= 4 && "bg-emerald-500/90 text-white",
-                  level.level === 5 && "bg-purple-600 text-white"
-                )}
-              >
+            <div>
+              <div className="text-xs text-muted-foreground uppercase">
+                Nivel actual
+              </div>
+              <div className="text-lg font-bold">
                 Nivel {level.level} · {level.name}
-              </Badge>
+              </div>
+              <div className="mt-1 flex flex-wrap gap-1">
+                <Badge
+                  variant="secondary"
+                  className={cn(
+                    "text-[10px] px-2 py-0.5 border-none",
+                    level.colorClass
+                  )}
+                >
+                  {totalPoints.toLocaleString("es-AR")} pts
+                </Badge>
+              </div>
             </div>
-            {nextLevelPoints && (
-              <p className="text-[11px] text-muted-foreground mt-1">
-                Te faltan{" "}
-                <span className="font-semibold">
-                  {Math.max(0, nextLevelPoints - totalPoints)} pts
-                </span>{" "}
-                para el próximo nivel.
-              </p>
-            )}
           </div>
 
           {/* Ranking */}
@@ -135,13 +135,39 @@ export function UserGamificationSummary() {
           </div>
         </div>
 
+        {/* Perks del nivel */}
+        {level.perks.length > 0 && (
+          <div className="mt-1">
+            <div className="text-[11px] text-muted-foreground mb-1">
+              Beneficios de tu nivel:
+            </div>
+            <ul className="text-[11px] text-muted-foreground space-y-0.5">
+              {level.perks.map((perk) => (
+                <li key={perk} className="flex gap-1">
+                  <span>•</span>
+                  <span>{perk}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Barra de progreso de nivel */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Progreso del nivel</span>
+            <span>Progreso hacia el próximo nivel</span>
             <span>{progressToNext}%</span>
           </div>
           <Progress value={progressToNext} className="h-2" />
+          {nextLevelPoints && (
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Te faltan{" "}
+              <span className="font-semibold">
+                {Math.max(0, nextLevelPoints - totalPoints)} pts
+              </span>{" "}
+              para el próximo nivel.
+            </p>
+          )}
         </div>
 
         {/* Stats de los últimos 30 días */}
