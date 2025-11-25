@@ -114,3 +114,22 @@ export interface SedeLeaderboardItem {
   sedeName: string;
   totalPoints: number;
 }
+
+export type BadgeMetric =
+  | "TOTAL_POINTS"
+  | "CLASS_ENROLL_COUNT"
+  | "ROUTINE_COMPLETE_COUNT";
+
+export interface UserBadgeStatus {
+  badgeId: number;
+  code: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  metric: BadgeMetric;
+  threshold: number;
+  currentValue: number;
+  progress: number; // 0–1
+  earned: boolean;
+  earnedAt: string | null;
+}

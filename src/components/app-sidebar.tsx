@@ -8,6 +8,7 @@ import {
   IconHome,
   IconTarget,
   IconKey,
+  IconArrowDownSquare
 } from "@tabler/icons-react";
 import { Dumbbell } from "lucide-react";
 
@@ -94,6 +95,12 @@ export async function AppSidebar({
         icon: IconTarget,
         roles: ["user"],
       },
+      {
+        title:"Logros",
+        url: "/" + user?.publicMetadata?.role + "/badges",
+        icon: IconArrowDownSquare,
+        roles: ["user"],
+      }
     ],
   };
 
