@@ -1,6 +1,7 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useEffect, useRef } from "react";
@@ -67,6 +68,9 @@ export function LevelUpModal({
             Seguir entrenando 💪
           </Button>
         </motion.div>
+        <VisuallyHidden>
+          <DialogTitle>Subiste de nivel</DialogTitle>
+        </VisuallyHidden>
       </DialogContent>
     </Dialog>
   );

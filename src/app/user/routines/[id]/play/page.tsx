@@ -3,8 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation } from "@tanstack/react-query";
-
+import { useQuery } from "@tanstack/react-query";
 
 import {
   Card,
@@ -25,8 +24,9 @@ import { IconBarbell, IconClock } from "@tabler/icons-react";
 import toast from "react-hot-toast";
 import routineService, {
   BestPerformance,
-  RoutineCompleteResponse,
 } from "@/services/routine.service";
+import { useBestPerformances } from "@/hooks/use-best-performance";
+import { useCompleteRoutine } from "@/hooks/use-completeRoutine";
 
 type Params = Promise<{ id: string }>;
 
@@ -41,6 +41,12 @@ type ExerciseState = {
   reps: string;
 };
 
+// Fórmula de 1RM: 1RM = peso * (1 + reps / 30)
+function calc1RM(weight: number, reps: number): number {
+  if (!weight || !reps) return 0;
+  return weight * (1 + reps / 30);
+}
+
 export default function RoutinePlayPage({ params }: { params: Params }) {
   const { getToken } = useAuth();
   const router = useRouter();
@@ -49,6 +55,7 @@ export default function RoutinePlayPage({ params }: { params: Params }) {
 
   const [exercisesState, setExercisesState] = useState<ExerciseState[]>([]);
 
+  // Datos de la rutina
   const {
     data: routine,
     isLoading: isRoutineLoading,
@@ -64,16 +71,17 @@ export default function RoutinePlayPage({ params }: { params: Params }) {
     },
   });
 
-  const { data: bestPerformances = [], isLoading: isBestLoading } = useQuery({
-    queryKey: ["routineBestPerformances", routineId],
-    queryFn: async () => {
-      const token = await getToken();
-      return routineService.getBestPerformances(routineId, token);
-    },
-    enabled: !!routineId,
-  });
+  // Mejores performances históricas (usa hook)
+  const {
+    data: bestPerformances = [],
+    isLoading: isBestLoading,
+  } = useBestPerformances(routineId);
 
-  // inicializar estado cuando ya tenemos la rutina
+  // Hook para completar rutina (dispara invalidaciones, gamificación, badges)
+  const { mutateAsync: completeRoutine, isPending: isSaving } =
+    useCompleteRoutine(routineId);
+
+  // Inicializar estado cuando ya tenemos la rutina
   useEffect(() => {
     if (!routine) return;
     setExercisesState((prev) => {
@@ -85,41 +93,7 @@ export default function RoutinePlayPage({ params }: { params: Params }) {
         reps: "",
       }));
     });
-    }, [routine]);
-
-const { mutateAsync: completeRoutine, isPending: isSaving } = useMutation<
-  RoutineCompleteResponse, 
-  Error,                  
-  ExerciseState[]          
->({
-  mutationFn: async (payload: ExerciseState[]) => {
-    const token = await getToken();
-    return routineService.completeRoutine(
-      routineId,
-      payload.map((ex) => ({
-        exerciseId: ex.exerciseId,
-        weight: Number(ex.weight),
-        reps: Number(ex.reps),
-      })),
-      token
-    );
-  },
-  onSuccess: (data) => {
-
-    const pts = data.pointsAwarded ?? 0;
-    if (pts > 0) {
-      toast.success(`Rutina guardada. Ganaste ${pts} puntos 🏅`);
-    } else {
-      toast.success("Rutina guardada 💪");
-    }
-
-    router.push("/user/routines");
-  },
-  onError: () => {
-    toast.error("Error al guardar la rutina.");
-  },
-});
-
+  }, [routine]);
 
   const handleChangeField = (
     exerciseId: number,
@@ -143,7 +117,16 @@ const { mutateAsync: completeRoutine, isPending: isSaving } = useMutation<
       return;
     }
 
-    await completeRoutine(payload);
+    const data = await completeRoutine(exercisesState);
+    const pts = data.pointsAwarded ?? 0;
+
+    if (pts > 0) {
+      toast.success(`Rutina guardada. Ganaste ${pts} puntos 🏅`);
+    } else {
+      toast.success("Rutina guardada 💪");
+    }
+
+    router.push("/user/routines");
   };
 
   if (isRoutineLoading || isBestLoading) {
@@ -229,20 +212,46 @@ const { mutateAsync: completeRoutine, isPending: isSaving } = useMutation<
             );
             const best = getBestForExercise(re.exerciseId);
 
+            // 1RM histórica
+            const best1RM =
+              best && best.weight && best.reps
+                ? calc1RM(best.weight, best.reps)
+                : 0;
+
+            // 1RM de hoy
+            const today1RM =
+              state && state.weight && state.reps
+                ? calc1RM(Number(state.weight), Number(state.reps))
+                : 0;
+
+            const isPR = today1RM > 0 && today1RM > best1RM;
+
             return (
               <Card
                 key={re.id}
                 className={cn(
                   "transition-all border border-border",
                   state?.completed &&
-                    "border-green-500/80 bg-green-50/40 dark:bg-green-950/20"
+                    "border-green-500/80 bg-green-50/40 dark:bg-green-950/20",
+                  isPR &&
+                    "border-emerald-500/90 shadow-[0_0_15px_rgba(16,185,129,0.6)]"
                 )}
               >
                 <CardHeader className="pb-2 flex flex-row items-center justify-between gap-2">
                   <div>
-                    <CardTitle className="text-base">
-                      {re.exercise?.name ?? "Ejercicio"}
-                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-base">
+                        {re.exercise?.name ?? "Ejercicio"}
+                      </CardTitle>
+                      {isPR && (
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] px-2 py-0.5 border-emerald-500/70 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40"
+                        >
+                          🎯 Nuevo récord 1RM
+                        </Badge>
+                      )}
+                    </div>
                     <CardDescription className="text-xs">
                       {re.sets && re.reps
                         ? `${re.sets} x ${re.reps} reps`
@@ -301,6 +310,14 @@ const { mutateAsync: completeRoutine, isPending: isSaving } = useMutation<
                           className="text-sm"
                         />
                       </div>
+                      {today1RM > 0 && (
+                        <div className="mt-1 text-[11px] text-muted-foreground">
+                          1RM estimado hoy:{" "}
+                          <span className="font-semibold">
+                            {today1RM.toFixed(1)} kg
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="w-full sm:w-48">
                       <div className="text-[11px] text-muted-foreground mb-1">
@@ -312,6 +329,11 @@ const { mutateAsync: completeRoutine, isPending: isSaving } = useMutation<
                             {best.weight} kg
                           </span>{" "}
                           · {best.reps} reps
+                          {best1RM > 0 && (
+                            <div className="text-[11px] text-muted-foreground">
+                              1RM estimado: {best1RM.toFixed(1)} kg
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="text-sm text-muted-foreground">–</div>

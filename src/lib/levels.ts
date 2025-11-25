@@ -57,7 +57,7 @@ export const LEVELS: LevelConfig[] = [
   },
   {
     level: 5,
-    minPoints: 299,
+    minPoints: 200,
     name: "Élite GymCloud",
     icon: "👑",
     colorClass: "bg-rose-600 text-white",
@@ -98,4 +98,37 @@ export function getLevelForPoints(points: number) {
     progressToNext,
     nextLevelPoints,
   };
+}
+
+// 🧮 Multiplicador de puntos según contexto + nivel
+export type PointsContext =
+  | { type: "class"; isBoostedClass?: boolean }
+  | { type: "routine" }
+  | { type: "generic" }; // para "toda la actividad"
+
+export function getPointsMultiplier(level: LevelConfig, ctx: PointsContext) {
+  // base = 1.0 → sin bonus
+  let multiplier = 1.0;
+
+  // Nivel 2: +5% en clases seleccionadas
+  if (level.level >= 2 && ctx.type === "class" && ctx.isBoostedClass) {
+    multiplier += 0.05;
+  }
+
+  // Nivel 3: +10% en rutinas completas
+  if (level.level >= 3 && ctx.type === "routine") {
+    multiplier += 0.10;
+  }
+
+  // Nivel 4: +20% en toda la actividad
+  if (level.level >= 4) {
+    multiplier += 0.20;
+  }
+
+  // Nivel 5: +30% en toda la actividad
+  if (level.level >= 5) {
+    multiplier += 0.30;
+  }
+
+  return multiplier;
 }

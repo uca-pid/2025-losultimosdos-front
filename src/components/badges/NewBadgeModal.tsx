@@ -1,11 +1,12 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export function NewBadgeModal({
   badge,
@@ -62,6 +63,9 @@ export function NewBadgeModal({
             </Link>
           </div>
         </motion.div>
+        <VisuallyHidden>
+          <DialogTitle>Subiste de nivel</DialogTitle>
+        </VisuallyHidden>
       </DialogContent>
     </Dialog>
   );
