@@ -4,6 +4,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useEffect, useRef } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export function NewBadgeModal({
   badge,
@@ -38,9 +40,9 @@ export function NewBadgeModal({
         <motion.div
           initial={{ scale: 0.6, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="space-y-3"
+          className="space-y-4"
         >
-          <div className="text-5xl">{badge.icon}</div>
+          <div className="text-5xl">{badge.icon ?? "🏅"}</div>
 
           <h2 className="text-2xl font-bold text-primary">
             ¡Nuevo logro desbloqueado!
@@ -48,7 +50,17 @@ export function NewBadgeModal({
 
           <p className="text-lg font-semibold">{badge.name}</p>
 
-          <p className="text-muted-foreground">{badge.description}</p>
+          {badge.description && (
+            <p className="text-muted-foreground">{badge.description}</p>
+          )}
+
+          <div className="pt-4 flex justify-center">
+            <Link href="/user/badges">
+              <Button onClick={() => onClose(false)}>
+                Ver todos los logros
+              </Button>
+            </Link>
+          </div>
         </motion.div>
       </DialogContent>
     </Dialog>
