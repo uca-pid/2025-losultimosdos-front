@@ -22,9 +22,7 @@ import { cn } from "@/lib/utils";
 import { Exercise, Routine, RoutineExercise } from "@/types";
 import { IconBarbell, IconClock } from "@tabler/icons-react";
 import toast from "react-hot-toast";
-import routineService, {
-  BestPerformance,
-} from "@/services/routine.service";
+import routineService, { BestPerformance } from "@/services/routine.service";
 import { useBestPerformances } from "@/hooks/use-best-performance";
 import { useCompleteRoutine } from "@/hooks/use-completeRoutine";
 
@@ -41,7 +39,6 @@ type ExerciseState = {
   reps: string;
 };
 
-// Fórmula de 1RM: 1RM = peso * (1 + reps / 30)
 function calc1RM(weight: number, reps: number): number {
   if (!weight || !reps) return 0;
   return weight * (1 + reps / 30);
@@ -55,7 +52,6 @@ export default function RoutinePlayPage({ params }: { params: Params }) {
 
   const [exercisesState, setExercisesState] = useState<ExerciseState[]>([]);
 
-  // Datos de la rutina
   const {
     data: routine,
     isLoading: isRoutineLoading,
@@ -71,17 +67,12 @@ export default function RoutinePlayPage({ params }: { params: Params }) {
     },
   });
 
-  // Mejores performances históricas (usa hook)
-  const {
-    data: bestPerformances = [],
-    isLoading: isBestLoading,
-  } = useBestPerformances(routineId);
+  const { data: bestPerformances = [], isLoading: isBestLoading } =
+    useBestPerformances(routineId);
 
-  // Hook para completar rutina (dispara invalidaciones, gamificación, badges)
   const { mutateAsync: completeRoutine, isPending: isSaving } =
     useCompleteRoutine(routineId);
 
-  // Inicializar estado cuando ya tenemos la rutina
   useEffect(() => {
     if (!routine) return;
     setExercisesState((prev) => {
@@ -162,7 +153,6 @@ export default function RoutinePlayPage({ params }: { params: Params }) {
 
   return (
     <div className="space-y-6">
-      {/* Header rutina */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -193,7 +183,6 @@ export default function RoutinePlayPage({ params }: { params: Params }) {
         </CardHeader>
       </Card>
 
-      {/* Lista de ejercicios */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -212,13 +201,11 @@ export default function RoutinePlayPage({ params }: { params: Params }) {
             );
             const best = getBestForExercise(re.exerciseId);
 
-            // 1RM histórica
             const best1RM =
               best && best.weight && best.reps
                 ? calc1RM(best.weight, best.reps)
                 : 0;
 
-            // 1RM de hoy
             const today1RM =
               state && state.weight && state.reps
                 ? calc1RM(Number(state.weight), Number(state.reps))

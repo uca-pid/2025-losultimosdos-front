@@ -2,7 +2,10 @@
 
 import { useState, useMemo } from "react";
 import { useStore } from "@/store/useStore";
-import { useUserLeaderboard, useSedeLeaderboard } from "@/hooks/use-leaderboard";
+import {
+  useUserLeaderboard,
+  useSedeLeaderboard,
+} from "@/hooks/use-leaderboard";
 import { LeaderboardPeriod } from "@/types";
 
 import { UserLeaderboard } from "@/components/gamification/user-leaderboard";
@@ -63,7 +66,6 @@ const AdminLeaderboardPage = () => {
 
   return (
     <div className="container mx-auto space-y-4 p-4">
-      {/* Header */}
       <div className="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
@@ -75,67 +77,50 @@ const AdminLeaderboardPage = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          {/* Filtro de período */}
-          <Card className="border-dashed">
-            <CardContent className="p-2 sm:px-3 sm:py-2">
-              <ToggleGroup
-                type="single"
-                value={period}
-                onValueChange={(value) => {
-                  if (!value) return;
-                  setPeriod(value as LeaderboardPeriod);
-                }}
-                className="flex gap-1"
+          <ToggleGroup
+            type="single"
+            value={period}
+            onValueChange={(value) => {
+              if (!value) return;
+              setPeriod(value as LeaderboardPeriod);
+            }}
+            className="flex gap-1"
+          >
+            {periods.map((p) => (
+              <ToggleGroupItem
+                key={p}
+                value={p}
+                className={cn(
+                  "px-2 py-1 text-xs sm:text-sm",
+                  "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                )}
               >
-                {periods.map((p) => (
-                  <ToggleGroupItem
-                    key={p}
-                    value={p}
-                    className={cn(
-                      "px-2 py-1 text-xs sm:text-sm",
-                      "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                    )}
-                  >
-                    {periodLabel[p]}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-              <p className="mt-1 text-[11px] text-muted-foreground max-w-xs">
-                {periodDescription[period]}
-              </p>
-            </CardContent>
-          </Card>
+                {periodLabel[p]}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
 
-          {/* Filtro sede */}
-          <Card className="border-dashed">
-            <CardContent className="p-2 sm:px-3 sm:py-2 flex flex-col gap-2">
-              <span className="text-[11px] font-medium text-muted-foreground">
-                Alcance del ranking
-              </span>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant={onlyCurrentSede ? "default" : "outline"}
-                  onClick={() => setOnlyCurrentSede(true)}
-                  className="text-xs"
-                >
-                  Sede actual ({selectedSede?.name})
-                </Button>
-                <Button
-                  size="sm"
-                  variant={!onlyCurrentSede ? "default" : "outline"}
-                  onClick={() => setOnlyCurrentSede(false)}
-                  className="text-xs"
-                >
-                  Todas las sedes
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant={onlyCurrentSede ? "default" : "outline"}
+              onClick={() => setOnlyCurrentSede(true)}
+              className="text-xs"
+            >
+              Sede actual ({selectedSede?.name})
+            </Button>
+            <Button
+              size="sm"
+              variant={!onlyCurrentSede ? "default" : "outline"}
+              onClick={() => setOnlyCurrentSede(false)}
+              className="text-xs"
+            >
+              Todas las sedes
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Estado de loading */}
       {isLoading ? (
         <TableSkeleton />
       ) : (

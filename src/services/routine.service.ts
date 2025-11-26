@@ -139,7 +139,6 @@ class RoutineService {
     })[];
   }
 
-  // 🔹 NUEVO: mejores series previas para cada ejercicio de la rutina
   async getBestPerformances(
     routineId: number,
     token: string | null
@@ -154,7 +153,6 @@ class RoutineService {
     return (data.items ?? []) as BestPerformance[];
   }
 
-  // 🔹 NUEVO: guardar mejores series de esta sesión
   async completeRoutine(
     routineId: number,
     performances: { exerciseId: number; weight: number; reps: number }[],
@@ -172,7 +170,6 @@ class RoutineService {
 
     return data as RoutineCompleteResponse;
   }
-
 
   private transformExercises(exercises: RoutineExercise[]) {
     return exercises.map((exercise) => ({

@@ -11,7 +11,6 @@ import { NewBadgeModal } from "@/components/badges/NewBadgeModal";
 export function NewBadgeWatcher() {
   const { userId, getToken } = useAuth();
 
-  // Siempre llamamos al hook, solo que lo deshabilitamos si no hay userId
   const { data: badges = [] } = useQuery<UserBadgeStatus[]>({
     queryKey: ["userBadges", userId],
     enabled: !!userId,
@@ -24,7 +23,6 @@ export function NewBadgeWatcher() {
   const [modalOpen, setModalOpen] = useState(false);
   const [newBadge, setNewBadge] = useState<UserBadgeStatus | null>(null);
 
-  // misma lógica que en el page
   const isUnlocked = (b: UserBadgeStatus) =>
     b.earned || b.progress >= 1 || b.currentValue >= b.threshold;
 
@@ -32,7 +30,6 @@ export function NewBadgeWatcher() {
   const initializedRef = useRef(false);
 
   useEffect(() => {
-    // si no hay usuario o no hay badges, no hacemos nada
     if (!userId || !badges || badges.length === 0) return;
 
     const currentEarnedIds = new Set(
@@ -40,7 +37,6 @@ export function NewBadgeWatcher() {
     );
 
     if (!initializedRef.current) {
-      // primer render: solo guardamos el estado actual
       initializedRef.current = true;
       prevEarnedIdsRef.current = currentEarnedIds;
       return;
@@ -60,7 +56,6 @@ export function NewBadgeWatcher() {
     }
   }, [badges, userId]);
 
-  // si no hay userId o no hay badge nueva para mostrar, no renderizamos nada
   if (!userId || !newBadge) return null;
 
   return (

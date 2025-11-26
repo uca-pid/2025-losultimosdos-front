@@ -39,6 +39,7 @@ export interface Routine {
   duration: number;
   icon: string;
   users: string[];
+  sedeId: number;
 }
 
 export interface MuscleGroup {
@@ -60,7 +61,7 @@ export interface RoutineExercise {
   exerciseId: number;
   sets?: number;
   reps?: number;
-  restTime?: number; 
+  restTime?: number;
 }
 
 export interface Sede {

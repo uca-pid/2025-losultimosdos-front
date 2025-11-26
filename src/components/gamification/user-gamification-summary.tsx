@@ -84,7 +84,6 @@ export function UserGamificationSummary() {
       </CardHeader>
 
       <CardContent className="relative space-y-5">
-        {/* Nivel actual */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
             <div
@@ -116,7 +115,6 @@ export function UserGamificationSummary() {
             </div>
           </div>
 
-          {/* Ranking */}
           <div className="text-sm flex flex-col items-start sm:items-end gap-1">
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground uppercase">
@@ -135,7 +133,6 @@ export function UserGamificationSummary() {
           </div>
         </div>
 
-        {/* Perks del nivel */}
         {level.perks.length > 0 && (
           <div className="mt-1">
             <div className="text-[11px] text-muted-foreground mb-1">

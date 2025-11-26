@@ -34,66 +34,65 @@ const UsersActionColumn = ({
     }
   }, [userId, row.original.users]);
 
- const handleEnroll = async (classId: number) => {
-  try {
-    setIsLoading(true);
-    const token = await getToken();
-    await apiService.post(
-      enrolled ? "/user/unenroll" : "/user/enroll",
-      { classId },
-      token!
-    );
+  const handleEnroll = async (classId: number) => {
+    try {
+      setIsLoading(true);
+      const token = await getToken();
+      await apiService.post(
+        enrolled ? "/user/unenroll" : "/user/enroll",
+        { classId },
+        token!
+      );
 
-    setEnrolled(!enrolled);
+      setEnrolled(!enrolled);
 
-    toast.success(
-      enrolled
-        ? "Inscripción cancelada con éxito"
-        : "Inscripción realizada con éxito",
-      { id: "enroll-class" }
-    );
+      toast.success(
+        enrolled
+          ? "Inscripción cancelada con éxito"
+          : "Inscripción realizada con éxito",
+        { id: "enroll-class" }
+      );
 
-    // 👇 refresca la lista de clases vía React Query (refetch en page.tsx)
-    onClassesChanged?.();
+      // 👇 refresca la lista de clases vía React Query (refetch en page.tsx)
+      onClassesChanged?.();
 
-    // 👇 refresca progreso gamificado (leaderboards "all" y "30d")
-    queryClient.invalidateQueries({
-      queryKey: [
-        "leaderboard-users",
-        { period: "all", sedeId: selectedSede.id },
-      ],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [
-        "leaderboard-users",
-        { period: "30d", sedeId: selectedSede.id },
-      ],
-    });
-
-    // 👇 refresca los badges del usuario (para que el UserBadgesPage se actualice)
-    if (userId) {
+      // 👇 refresca progreso gamificado (leaderboards "all" y "30d")
       queryClient.invalidateQueries({
-        queryKey: ["userBadges", userId],
+        queryKey: [
+          "leaderboard-users",
+          { period: "all", sedeId: selectedSede.id },
+        ],
       });
-    }
+      queryClient.invalidateQueries({
+        queryKey: [
+          "leaderboard-users",
+          { period: "30d", sedeId: selectedSede.id },
+        ],
+      });
 
-    // si todavía lo necesitás para otros server components
-    router.refresh();
-  } catch (error: any) {
-    if (error.status === 403) {
-      toast.error("Con el plan básico solo puedes inscribirte en 3 clases", {
-        id: "enroll-class",
-      });
-    } else {
-      toast.error("Hubo un error al procesar tu solicitud", {
-        id: "enroll-class",
-      });
-    }
-  } finally {
-    setIsLoading(false);
-  }
-};
+      // 👇 refresca los badges del usuario (para que el UserBadgesPage se actualice)
+      if (userId) {
+        queryClient.invalidateQueries({
+          queryKey: ["userBadges", userId],
+        });
+      }
 
+      // si todavía lo necesitás para otros server components
+      router.refresh();
+    } catch (error: any) {
+      if (error.status === 403) {
+        toast.error("Con el plan básico solo puedes inscribirte en 3 clases", {
+          id: "enroll-class",
+        });
+      } else {
+        toast.error("Hubo un error al procesar tu solicitud", {
+          id: "enroll-class",
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className=" px-4 py-2 flex gap-2 items-center justify-end">
@@ -150,7 +149,9 @@ export const UsersClassesTable = ({
   return (
     <DataTable
       columns={usersColumns}
-      data={classes}
+      data={classes.sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      )}
       headerClassName="last:items-center last:justify-end last:w-min last:w-[100px] last:min-w-[100px]"
     />
   );

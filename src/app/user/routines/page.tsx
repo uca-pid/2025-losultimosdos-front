@@ -41,8 +41,6 @@ const RoutinesPage = () => {
     );
   }
 
-  console.log("routines", routines);
-
   const extraColumns: ColumnDef<Routine>[] = [
     {
       header: "Acciones",

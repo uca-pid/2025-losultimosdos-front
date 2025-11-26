@@ -11,13 +11,11 @@ export function useMyGamification() {
 
   const sedeId = selectedSede?.id;
 
-  // Histórico (para puntos totales y nivel)
   const allQuery = useUserLeaderboard({
     period: "all" as LeaderboardPeriod,
     sedeId,
   });
 
-  // Últimos 30 días (para ver cómo viene últimamente)
   const last30Query = useUserLeaderboard({
     period: "30d" as LeaderboardPeriod,
     sedeId,
