@@ -13,6 +13,7 @@ import { Skeleton } from "../ui/skeleton";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStore } from "@/store/useStore";
+import { useEvaluateChallenges } from "@/hooks/use-evaluate-challenge"; 
 
 const UsersActionColumn = ({
   row,
@@ -27,6 +28,7 @@ const UsersActionColumn = ({
   const [enrolled, setEnrolled] = useState(false);
   const queryClient = useQueryClient();
   const { selectedSede } = useStore();
+  const { mutate: evaluateChallenges } = useEvaluateChallenges(); 
 
   useEffect(() => {
     if (userId) {
@@ -44,6 +46,7 @@ const UsersActionColumn = ({
         token!
       );
 
+      const wasEnrolled = enrolled;
       setEnrolled(!enrolled);
 
       toast.success(
@@ -53,10 +56,10 @@ const UsersActionColumn = ({
         { id: "enroll-class" }
       );
 
-      // 👇 refresca la lista de clases vía React Query (refetch en page.tsx)
+      // refresca la lista de clases vía React Query (refetch en page.tsx)
       onClassesChanged?.();
 
-      // 👇 refresca progreso gamificado (leaderboards "all" y "30d")
+      // refresca progreso gamificado (leaderboards "all" y "30d")
       queryClient.invalidateQueries({
         queryKey: [
           "leaderboard-users",
@@ -70,17 +73,24 @@ const UsersActionColumn = ({
         ],
       });
 
-      // 👇 refresca los badges del usuario (para que el UserBadgesPage se actualice)
+      // refresca los badges del usuario
       if (userId) {
         queryClient.invalidateQueries({
           queryKey: ["userBadges", userId],
         });
       }
 
-      // si todavía lo necesitás para otros server components
+      // 🔥 si el usuario se ACABA de inscribir (antes no lo estaba),
+      // evaluamos desafíos. Si se completa alguno, el propio hook
+      // useEvaluateChallenges muestra el toast y refresca gamificación.
+      if (!wasEnrolled) {
+        evaluateChallenges();
+      }
+
+      // por si lo usás en server components
       router.refresh();
     } catch (error: any) {
-      if (error.status === 403) {
+      if (error?.status === 403) {
         toast.error("Con el plan básico solo puedes inscribirte en 3 clases", {
           id: "enroll-class",
         });

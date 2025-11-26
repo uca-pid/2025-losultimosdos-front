@@ -28,9 +28,7 @@ export const LEVELS: LevelConfig[] = [
     name: "Entrenando en serio",
     icon: "💪",
     colorClass: "bg-emerald-600 text-white",
-    perks: [
-      "Multiplicador de puntos +5% en clases seleccionadas",
-    ],
+    perks: ["Multiplicador de puntos +5% en clases seleccionadas"],
   },
   {
     level: 3,
@@ -50,9 +48,10 @@ export const LEVELS: LevelConfig[] = [
     icon: "⚡",
     colorClass: "bg-purple-600 text-white",
     perks: [
+      "Acceso a desafíos especiales",
       "Multiplicador de puntos +20% en toda la actividad",
-      "Perfil con borde especial animado",
-      "Recompensa mensual simbólica",
+      "Perfil de progreso destacado",
+      "Mascota de entrenamiento virtual",
     ],
   },
   {
@@ -62,12 +61,11 @@ export const LEVELS: LevelConfig[] = [
     icon: "👑",
     colorClass: "bg-rose-600 text-white",
     perks: [
-      "Multiplicador de puntos +30%",
-      "Icono global especial en el perfil",
-      "Insignia permanente de élite",
-      "Efectos visuales exclusivos en el panel",
-      "Acceso a desafíos élite",
-      "Invitación a eventos/giveaways internos",
+      "Acceso a desafíos especiales",
+      "Multiplicador de puntos +30% en toda la actividad",
+      "Perfil de progreso destacado",
+      "Mascota de entrenamiento virtual",
+
     ],
   },
 ];
@@ -110,25 +108,18 @@ export function getPointsMultiplier(level: LevelConfig, ctx: PointsContext) {
   // base = 1.0 → sin bonus
   let multiplier = 1.0;
 
-  // Nivel 2: +5% en clases seleccionadas
-  if (level.level >= 2 && ctx.type === "class" && ctx.isBoostedClass) {
-    multiplier += 0.05;
+  if (level.level === 5) {
+    multiplier += 0.3; // +30% en nivel 5
+  } else if (level.level === 4) {
+    multiplier += 0.2; // +20% en nivel 4
+  } else if (level.level === 3) {
+    if (ctx.type === "routine") {
+      multiplier += 0.1; // +10% en nivel 3 para rutinas completas
+    }
+  } else if (level.level === 2) {
+    if (ctx.type === "class" && ctx.isBoostedClass) {
+      multiplier += 0.05; // +5% en nivel 2 para clases seleccionadas
+    }
   }
-
-  // Nivel 3: +10% en rutinas completas
-  if (level.level >= 3 && ctx.type === "routine") {
-    multiplier += 0.10;
-  }
-
-  // Nivel 4: +20% en toda la actividad
-  if (level.level >= 4) {
-    multiplier += 0.20;
-  }
-
-  // Nivel 5: +30% en toda la actividad
-  if (level.level >= 5) {
-    multiplier += 0.30;
-  }
-
   return multiplier;
 }

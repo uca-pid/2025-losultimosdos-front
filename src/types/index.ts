@@ -134,3 +134,20 @@ export interface UserBadgeStatus {
   earned: boolean;
   earnedAt: string | null;
 }
+
+export type ChallengeFrequency = "DAILY" | "WEEKLY";
+
+export interface Challenge {
+  id: number;
+  title: string;
+  description?: string | null;
+  frequency: ChallengeFrequency;
+  pointsReward: number;
+  minLevel: number;
+  sedeId?: number | null;
+  isActive: boolean;
+  createdAt: string; // Date serializado
+  updatedAt: string;
+  currentLevel: number; // viene del back
+  isCompleted: boolean; // viene del back
+}

@@ -25,6 +25,9 @@ import toast from "react-hot-toast";
 import routineService, { BestPerformance } from "@/services/routine.service";
 import { useBestPerformances } from "@/hooks/use-best-performance";
 import { useCompleteRoutine } from "@/hooks/use-completeRoutine";
+import { TrainingMascot } from "@/components/routines/mascot/trainingMascot"; // 🐾
+import { useMyGamification } from "@/hooks/use-my-gamification";           // ⭐
+import { getLevelForPoints } from "@/lib/levels";                           // ⭐
 
 type Params = Promise<{ id: string }>;
 
@@ -51,6 +54,11 @@ export default function RoutinePlayPage({ params }: { params: Params }) {
   const routineId = Number(id);
 
   const [exercisesState, setExercisesState] = useState<ExerciseState[]>([]);
+
+  // 🔹 Gamificación del usuario para saber el nivel
+  const { totalPoints } = useMyGamification();
+  const { level } = getLevelForPoints(totalPoints);
+  const isLegendOrHigher = level.level >= 4; // ⚡ nivel 4+
 
   const {
     data: routine,
@@ -153,7 +161,14 @@ export default function RoutinePlayPage({ params }: { params: Params }) {
 
   return (
     <div className="space-y-6">
-      <Card>
+      {/* 🔥 Card de progreso con borde glowing para nivel 4+ */}
+      <Card
+        className={cn(
+          "relative overflow-hidden border bg-background",
+          isLegendOrHigher &&
+            "border-transparent bg-[radial-gradient(circle_at_top,_#a855f733,_transparent_55%),_radial-gradient(circle_at_bottom,_#ec489933,_transparent_55%)] before:absolute before:inset-0 before:-z-10 before:bg-[conic-gradient(at_top,_#a855f7,_#ec4899,_#f97316,_#a855f7)] before:opacity-60 before:animate-[spin_10s_linear_infinite]"
+        )}
+      >
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -183,7 +198,11 @@ export default function RoutinePlayPage({ params }: { params: Params }) {
         </CardHeader>
       </Card>
 
-      <Card>
+      {/* Card de ejercicios con mascota condicional */}
+      <Card className="relative overflow-hidden">
+        {/* 🐾 Mascota SOLO si sos nivel 4+ */}
+        <TrainingMascot visible={isLegendOrHigher} />
+
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconBarbell />

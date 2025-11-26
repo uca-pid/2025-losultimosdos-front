@@ -4,11 +4,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import RoutineService from "@/services/routine.service";
 import { useAuth } from "@clerk/nextjs";
 import { useStore } from "@/store/useStore";
+import { useEvaluateChallenges } from "@/hooks/use-evaluate-challenge"; // 👈 nuevo import
 
 export function useCompleteRoutine(routineId: number) {
   const { getToken, userId } = useAuth();
   const queryClient = useQueryClient();
   const { selectedSede } = useStore();
+  const { mutate: evaluateChallenges } = useEvaluateChallenges(); // 👈 lo usamos luego
 
   return useMutation({
     mutationFn: async (
@@ -62,6 +64,11 @@ export function useCompleteRoutine(routineId: number) {
           { period: "30d", sedeId: selectedSede.id },
         ],
       });
+
+      // 👇 acá se evalúan desafíos (daily/weekly) y si hay nuevos,
+      // el propio hook useEvaluateChallenges muestra el toast y
+      // hace invalidate de ["challenges", ...] y ["my-gamification", ...]
+      evaluateChallenges();
     },
   });
 }

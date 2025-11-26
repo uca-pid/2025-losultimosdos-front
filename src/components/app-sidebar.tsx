@@ -27,6 +27,7 @@ import {
 import { currentUser } from "@clerk/nextjs/server";
 import { Skeleton } from "./ui/skeleton";
 import { SedesSwitcher } from "./sedes-switcher";
+import { title } from "process";
 
 export async function AppSidebar({
   ...props
@@ -98,6 +99,12 @@ export async function AppSidebar({
       {
         title:"Logros",
         url: "/" + user?.publicMetadata?.role + "/badges",
+        icon: IconArrowDownSquare,
+        roles: ["user"],
+      },
+      {
+        title: "Desafíos",
+        url: "/" + user?.publicMetadata?.role + "/challenges",
         icon: IconArrowDownSquare,
         roles: ["user"],
       }

@@ -1,3 +1,4 @@
+// src/components/gamification/UserGamificationSummary.tsx
 "use client";
 
 import { useAuth, useUser } from "@clerk/nextjs";
@@ -53,8 +54,16 @@ export function UserGamificationSummary() {
   const { level, progressToNext, nextLevelPoints } =
     getLevelForPoints(totalPoints);
 
+  const isLegendOrHigher = level.level >= 4; // Nivel 4+ → borde animado
+
   return (
-    <Card className="relative overflow-hidden">
+    <Card
+      className={cn(
+        "relative overflow-hidden border bg-background",
+        isLegendOrHigher &&
+          "border-transparent bg-[radial-gradient(circle_at_top,_#a855f733,_transparent_55%),_radial-gradient(circle_at_bottom,_#ec489933,_transparent_55%)] before:absolute before:inset-0 before:-z-10 before:bg-[conic-gradient(at_top,_#a855f7,_#ec4899,_#f97316,_#a855f7)] before:opacity-60 before:animate-[spin_8s_linear_infinite]"
+      )}
+    >
       <div className="absolute inset-0 pointer-events-none opacity-60 dark:opacity-40 bg-[radial-gradient(circle_at_top,_#3b82f620,_transparent_60%),_radial-gradient(circle_at_bottom,_#22c55e20,_transparent_60%)]" />
 
       <CardHeader className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -74,11 +83,22 @@ export function UserGamificationSummary() {
             </span>
           )}
           {user?.imageUrl && (
-            <img
-              src={user.imageUrl}
-              alt="Avatar"
-              className="h-9 w-9 rounded-full border shadow-sm"
-            />
+            <div
+              className={cn(
+                "rounded-full p-[2px]",
+                isLegendOrHigher &&
+                  "bg-[conic-gradient(from_0deg,_#a855f7,_#ec4899,_#f97316,_#a855f7)] animate-[spin_10s_linear_infinite]"
+              )}
+            >
+              <img
+                src={user.imageUrl}
+                alt="Avatar"
+                className={cn(
+                  "h-9 w-9 rounded-full border shadow-sm",
+                  isLegendOrHigher && "border-transparent"
+                )}
+              />
+            </div>
           )}
         </div>
       </CardHeader>
@@ -89,7 +109,9 @@ export function UserGamificationSummary() {
             <div
               className={cn(
                 "flex h-12 w-12 items-center justify-center rounded-full shadow-md",
-                level.colorClass
+                level.colorClass,
+                isLegendOrHigher &&
+                  "ring-2 ring-offset-2 ring-offset-background ring-purple-400/80 animate-pulse"
               )}
             >
               <span className="text-2xl">{level.icon}</span>
@@ -149,7 +171,7 @@ export function UserGamificationSummary() {
           </div>
         )}
 
-        {/* Barra de progreso de nivel */}
+        {/* Progreso de nivel */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Progreso hacia el próximo nivel</span>
