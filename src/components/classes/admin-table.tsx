@@ -101,6 +101,13 @@ const AdminTable = ({ classes }: AdminTableProps) => {
     },
   ];
 
+  const getRowClassName = (gymClass: GymClass): string => {
+    if (gymClass.isBoostedForPoints) {
+      return "boosted-row";
+    }
+    return "";
+  };
+
   return (
     <Sheet
       open={!!selectedClass}
@@ -113,6 +120,7 @@ const AdminTable = ({ classes }: AdminTableProps) => {
           data={classes}
           extraColumns={adminColumns}
           headerClassName="last:items-center last:justify-end last:w-min last:w-[100px] last:min-w-[100px]"
+          getRowClassName={getRowClassName}
         />
       </div>
 
@@ -130,25 +138,13 @@ const AdminTable = ({ classes }: AdminTableProps) => {
           classes.map((cls) => (
             <Card
               key={cls.id}
-              className={cn(
-                "overflow-hidden",
-                cls.isBoostedForPoints &&
-                  "border-yellow-400/70 shadow-[0_0_18px_rgba(250,204,21,0.4)]"
-              )}
+              className={cn("overflow-hidden", getRowClassName(cls))}
             >
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <CardTitle className="text-base">{cls.name}</CardTitle>
                   </div>
-                  {cls.isBoostedForPoints && (
-                    <Badge
-                      variant="outline"
-                      className="border-yellow-400/70 bg-yellow-400/10 text-yellow-700 text-[10px] uppercase tracking-wide"
-                    >
-                     Boosted
-                    </Badge>
-                  )}
                 </div>
 
                 <CardAction className="mt-2 flex gap-2">
@@ -217,11 +213,7 @@ const AdminTable = ({ classes }: AdminTableProps) => {
         </SheetHeader>
         {selectedClass && (
           <div className="mt-4">
-            <ClassForm
-              defaultValues={selectedClass}
-              onSubmit={onEdit}
-              isEdit
-            />
+            <ClassForm defaultValues={selectedClass} onSubmit={onEdit} isEdit />
           </div>
         )}
       </SheetContent>
