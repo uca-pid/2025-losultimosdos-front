@@ -30,7 +30,7 @@ const UsersActionColumn = ({
   row: Row<GymClass>;
   onClassesChanged?: () => void;
 }) => {
-  const { userId, getToken } = useAuth();
+  const { userId } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
@@ -47,12 +47,9 @@ const UsersActionColumn = ({
   const handleEnroll = async (classId: number) => {
     try {
       setIsLoading(true);
-      const token = await getToken();
-      await apiService.post(
-        enrolled ? "/user/unenroll" : "/user/enroll",
-        { classId },
-        token!
-      );
+      await apiService.post(enrolled ? "/user/unenroll" : "/user/enroll", {
+        classId,
+      });
 
       const wasEnrolled = enrolled;
       setEnrolled(!enrolled);
@@ -141,7 +138,7 @@ const MobileActionButton = ({
   gymClass: GymClass;
   onClassesChanged?: () => void;
 }) => {
-  const { userId, getToken } = useAuth();
+  const { userId } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
@@ -158,12 +155,9 @@ const MobileActionButton = ({
   const handleEnroll = async (classId: number) => {
     try {
       setIsLoading(true);
-      const token = await getToken();
-      await apiService.post(
-        enrolled ? "/user/unenroll" : "/user/enroll",
-        { classId },
-        token!
-      );
+      await apiService.post(enrolled ? "/user/unenroll" : "/user/enroll", {
+        classId,
+      });
 
       const wasEnrolled = enrolled;
       setEnrolled(!enrolled);

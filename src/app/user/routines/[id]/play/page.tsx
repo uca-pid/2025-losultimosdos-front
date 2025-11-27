@@ -1,7 +1,6 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
@@ -26,8 +25,8 @@ import routineService, { BestPerformance } from "@/services/routine.service";
 import { useBestPerformances } from "@/hooks/use-best-performance";
 import { useCompleteRoutine } from "@/hooks/use-completeRoutine";
 import { TrainingMascot } from "@/components/routines/mascot/trainingMascot"; // 🐾
-import { useMyGamification } from "@/hooks/use-my-gamification";           // ⭐
-import { getLevelForPoints } from "@/lib/levels";                           // ⭐
+import { useMyGamification } from "@/hooks/use-my-gamification"; // ⭐
+import { getLevelForPoints } from "@/lib/levels"; // ⭐
 
 type Params = Promise<{ id: string }>;
 
@@ -48,7 +47,6 @@ function calc1RM(weight: number, reps: number): number {
 }
 
 export default function RoutinePlayPage({ params }: { params: Params }) {
-  const { getToken } = useAuth();
   const router = useRouter();
   const { id } = use(params);
   const routineId = Number(id);
@@ -67,10 +65,8 @@ export default function RoutinePlayPage({ params }: { params: Params }) {
   } = useQuery({
     queryKey: ["routine", routineId],
     queryFn: async () => {
-      const token = await getToken();
       return routineService.getRoutine(
-        Number(routineId),
-        token
+        Number(routineId)
       ) as Promise<RoutineWithExercises>;
     },
   });
