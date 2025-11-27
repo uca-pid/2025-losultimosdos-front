@@ -270,8 +270,7 @@ export const ClassForm = ({
                   <div className="space-y-1">
                     <FormLabel>Clase boosteada</FormLabel>
                     <FormDescription>
-                      Resalta esta clase y permite otorgar más puntos al
-                      inscribirse.
+                      Resalta esta clase 
                     </FormDescription>
                   </div>
                   <FormControl>

@@ -146,7 +146,7 @@ const AdminTable = ({ classes }: AdminTableProps) => {
                       variant="outline"
                       className="border-yellow-400/70 bg-yellow-400/10 text-yellow-700 text-[10px] uppercase tracking-wide"
                     >
-                      Boost de puntos
+                     Boosted
                     </Badge>
                   )}
                 </div>
