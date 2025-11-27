@@ -25,7 +25,6 @@ import { toast } from "react-hot-toast";
 import { ApiValidationError } from "@/services/api.service";
 import { useStore } from "@/store/useStore";
 
-// 🔐 Schema del formulario
 const classFormSchema = z.object({
   id: z.number(),
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
@@ -55,16 +54,13 @@ const classFormSchema = z.object({
   users: z.array(z.string()),
   sedeId: z.number(),
   isBoostedForPoints: z.boolean(),
-  
 });
 
 export type ClassFormValues = z.infer<typeof classFormSchema>;
 
-
 interface ClassFormProps {
   onSubmit: (values: ClassFormValues) => Promise<void>;
   isLoading?: boolean;
-  // 👇 puede venir incompleto (ej: solo en edición)
   defaultValues?: Partial<ClassFormValues>;
   isEdit?: boolean;
 }
@@ -83,17 +79,14 @@ export const ClassForm = ({
       id: defaultValues?.id ?? 0,
       name: defaultValues?.name ?? "",
       description: defaultValues?.description ?? "",
-      // si no hay fecha, arrancamos con hoy (el user igual la puede cambiar)
-      date: defaultValues?.date
-        ? new Date(defaultValues.date)
-        : new Date(),
+      date: defaultValues?.date ? new Date(defaultValues.date) : new Date(),
       time: defaultValues?.time ?? "",
       capacity: defaultValues?.capacity ?? 1,
       enrolled: defaultValues?.enrolled ?? 0,
       createdById: defaultValues?.createdById ?? "",
       users: defaultValues?.users ?? [],
       sedeId: defaultValues?.sedeId ?? selectedSede.id,
-      isBoostedForPoints: defaultValues?.isBoostedForPoints ,
+      isBoostedForPoints: defaultValues?.isBoostedForPoints,
     },
   });
   const handleSubmit = async (values: ClassFormValues) => {
@@ -261,7 +254,6 @@ export const ClassForm = ({
               )}
             />
 
-            {/* ⭐ Toggle Boost */}
             <FormField
               control={form.control}
               name="isBoostedForPoints"
@@ -269,9 +261,7 @@ export const ClassForm = ({
                 <FormItem className="flex items-center justify-between rounded-md border p-3">
                   <div className="space-y-1">
                     <FormLabel>Clase boosteada</FormLabel>
-                    <FormDescription>
-                      Resalta esta clase 
-                    </FormDescription>
+                    <FormDescription>Resalta esta clase</FormDescription>
                   </div>
                   <FormControl>
                     <Switch
