@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { type ColumnDef } from "@tanstack/react-table";
-import { useAuth } from "@clerk/nextjs";
 
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
@@ -52,15 +51,12 @@ const AdminTable = ({ classes }: AdminTableProps) => {
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const isMobile = useIsMobile();
-  const { getToken } = useAuth();
   const router = useRouter();
 
   const onDelete = async (id: number) => {
     try {
       setDeletingId(id);
-      const token = await getToken();
-      if (!token) return;
-      await apiService.delete(`/admin/class/${id}`, token);
+      await apiService.delete(`/admin/class/${id}`);
       router.refresh();
     } finally {
       setDeletingId(null);
@@ -68,11 +64,8 @@ const AdminTable = ({ classes }: AdminTableProps) => {
   };
 
   const onEdit = async (values: GymClass) => {
-    const token = await getToken();
-    if (!token) return;
-
     // Enviamos todo el objeto; el back valida con Zod y usa lo que necesita
-    await apiService.put(`/admin/class/${values.id}`, { ...values }, token);
+    await apiService.put(`/admin/class/${values.id}`, { ...values });
     router.refresh();
     setSelectedClass(null);
   };

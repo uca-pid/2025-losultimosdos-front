@@ -5,7 +5,6 @@ import { ClassForm, type ClassFormValues } from "../forms/class";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 import apiService from "@/services/api.service";
-import { useAuth } from "@clerk/nextjs";
 
 interface CreateClassSheetProps {
   onCreated?: () => void;
@@ -13,13 +12,9 @@ interface CreateClassSheetProps {
 
 const CreateClassSheet = ({ onCreated }: CreateClassSheetProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { getToken } = useAuth();
 
   // 👇 ahora usamos ClassFormValues, no GymClass
   const onCreate = async (values: ClassFormValues) => {
-    const token = await getToken();
-    if (!token) return;
-
     // armamos el payload que el back espera
     const payload = {
       name: values.name,
@@ -31,7 +26,7 @@ const CreateClassSheet = ({ onCreated }: CreateClassSheetProps) => {
       isBoostedForPoints: values.isBoostedForPoints,
     };
 
-    await apiService.post(`/admin/class`, payload, token);
+    await apiService.post(`/admin/class`, payload);
 
     // avisamos a la página que hay una nueva clase
     onCreated?.();
