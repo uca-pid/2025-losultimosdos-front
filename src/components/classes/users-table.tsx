@@ -13,7 +13,9 @@ import { Skeleton } from "../ui/skeleton";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStore } from "@/store/useStore";
-import { useEvaluateChallenges } from "@/hooks/use-evaluate-challenge"; 
+import { useEvaluateChallenges } from "@/hooks/use-evaluate-challenge";
+
+import { Badge } from "../ui/badge";
 
 const UsersActionColumn = ({
   row,
@@ -28,7 +30,7 @@ const UsersActionColumn = ({
   const [enrolled, setEnrolled] = useState(false);
   const queryClient = useQueryClient();
   const { selectedSede } = useStore();
-  const { mutate: evaluateChallenges } = useEvaluateChallenges(); 
+  const { mutate: evaluateChallenges } = useEvaluateChallenges();
 
   useEffect(() => {
     if (userId) {
@@ -106,6 +108,16 @@ const UsersActionColumn = ({
 
   return (
     <div className=" px-4 py-2 flex gap-2 items-center justify-end">
+    
+      {row.original.isBoostedForPoints && (
+        <Badge
+          variant="outline"
+          className="mr-2 border-yellow-400/70 bg-yellow-400/10 text-yellow-700 text-[10px] uppercase tracking-wide"
+        >
+          Boosted
+        </Badge>
+      )}
+
       <ClerkLoading>
         <Skeleton className="w-[150px] h-[36px]" />
       </ClerkLoading>
@@ -133,7 +145,6 @@ const UsersActionColumn = ({
     </div>
   );
 };
-
 export const UsersClassesTable = ({
   classes,
   onClassesChanged,

@@ -21,11 +21,13 @@ import {
   CardContent,
   CardAction,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 import apiService from "@/services/api.service";
 import { ClassForm } from "@/components/forms/class";
 import { type GymClass } from "@/types";
 import { columns } from "@/components/classes/columns";
+import { cn } from "@/lib/utils";
 
 const useIsMobile = (query = "(max-width: 640px)") => {
   const [isMobile, setIsMobile] = useState(false);
@@ -58,7 +60,7 @@ const AdminTable = ({ classes }: AdminTableProps) => {
       setDeletingId(id);
       const token = await getToken();
       if (!token) return;
-      await apiService.delete(`/admin/class/${id}`, token!);
+      await apiService.delete(`/admin/class/${id}`, token);
       router.refresh();
     } finally {
       setDeletingId(null);
@@ -68,7 +70,9 @@ const AdminTable = ({ classes }: AdminTableProps) => {
   const onEdit = async (values: GymClass) => {
     const token = await getToken();
     if (!token) return;
-    await apiService.put(`/admin/class/${values.id}`, { ...values }, token!);
+
+    // Enviamos todo el objeto; el back valida con Zod y usa lo que necesita
+    await apiService.put(`/admin/class/${values.id}`, { ...values }, token);
     router.refresh();
     setSelectedClass(null);
   };
@@ -102,6 +106,7 @@ const AdminTable = ({ classes }: AdminTableProps) => {
       open={!!selectedClass}
       onOpenChange={(open) => !open && setSelectedClass(null)}
     >
+      {/* Desktop */}
       <div className="hidden sm:block">
         <DataTable
           columns={columns}
@@ -111,6 +116,7 @@ const AdminTable = ({ classes }: AdminTableProps) => {
         />
       </div>
 
+      {/* Mobile */}
       <div className="sm:hidden space-y-3">
         {classes.length === 0 ? (
           <Card>
@@ -122,9 +128,29 @@ const AdminTable = ({ classes }: AdminTableProps) => {
           </Card>
         ) : (
           classes.map((cls) => (
-            <Card key={cls.id} className="overflow-hidden">
+            <Card
+              key={cls.id}
+              className={cn(
+                "overflow-hidden",
+                cls.isBoostedForPoints &&
+                  "border-yellow-400/70 shadow-[0_0_18px_rgba(250,204,21,0.4)]"
+              )}
+            >
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">{cls.name}</CardTitle>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <CardTitle className="text-base">{cls.name}</CardTitle>
+                  </div>
+                  {cls.isBoostedForPoints && (
+                    <Badge
+                      variant="outline"
+                      className="border-yellow-400/70 bg-yellow-400/10 text-yellow-700 text-[10px] uppercase tracking-wide"
+                    >
+                      Boost de puntos
+                    </Badge>
+                  )}
+                </div>
+
                 <CardAction className="mt-2 flex gap-2">
                   <SheetTrigger onClick={() => setSelectedClass(cls)} asChild>
                     <Button size="sm" variant="outline" className="flex-1">
@@ -167,14 +193,13 @@ const AdminTable = ({ classes }: AdminTableProps) => {
                   <div className="text-gray-900 dark:text-gray-100 text-right">
                     {typeof cls.capacity === "number" ? cls.capacity : "-"}
                   </div>
-                                    <div className="text-gray-500 dark:text-gray-400">
+
+                  <div className="text-gray-500 dark:text-gray-400">
                     Inscriptos
                   </div>
                   <div className="text-gray-900 dark:text-gray-100 text-right">
                     {typeof cls.enrolled === "number" ? cls.enrolled : "-"}
                   </div>
-                  
-
                 </div>
               </CardContent>
             </Card>
@@ -182,6 +207,7 @@ const AdminTable = ({ classes }: AdminTableProps) => {
         )}
       </div>
 
+      {/* Sheet para editar */}
       <SheetContent
         side={isMobile ? "bottom" : "right"}
         className={isMobile ? "h-[90vh] w-full p-4" : "sm:w-[540px]"}
@@ -191,7 +217,11 @@ const AdminTable = ({ classes }: AdminTableProps) => {
         </SheetHeader>
         {selectedClass && (
           <div className="mt-4">
-            <ClassForm defaultValues={selectedClass} onSubmit={onEdit} isEdit />
+            <ClassForm
+              defaultValues={selectedClass}
+              onSubmit={onEdit}
+              isEdit
+            />
           </div>
         )}
       </SheetContent>
