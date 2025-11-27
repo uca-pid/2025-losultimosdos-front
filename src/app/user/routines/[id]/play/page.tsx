@@ -24,9 +24,9 @@ import toast from "react-hot-toast";
 import routineService, { BestPerformance } from "@/services/routine.service";
 import { useBestPerformances } from "@/hooks/use-best-performance";
 import { useCompleteRoutine } from "@/hooks/use-completeRoutine";
-import { TrainingMascot } from "@/components/routines/mascot/trainingMascot"; // 🐾
-import { useMyGamification } from "@/hooks/use-my-gamification"; // ⭐
-import { getLevelForPoints } from "@/lib/levels"; // ⭐
+import { TrainingMascot } from "@/components/routines/mascot/trainingMascot";
+import { useMyGamification } from "@/hooks/use-my-gamification";
+import { getLevelForPoints } from "@/lib/levels";
 
 type Params = Promise<{ id: string }>;
 
@@ -157,7 +157,6 @@ export default function RoutinePlayPage({ params }: { params: Params }) {
 
   return (
     <div className="space-y-6">
-      {/* 🔥 Card de progreso con borde glowing para nivel 4+ */}
       <Card
         className={cn(
           "relative overflow-hidden border bg-background",
@@ -194,9 +193,7 @@ export default function RoutinePlayPage({ params }: { params: Params }) {
         </CardHeader>
       </Card>
 
-      {/* Card de ejercicios con mascota condicional */}
       <Card className="relative overflow-hidden">
-        {/* 🐾 Mascota SOLO si sos nivel 4+ */}
         <TrainingMascot visible={isLegendOrHigher} />
 
         <CardHeader>

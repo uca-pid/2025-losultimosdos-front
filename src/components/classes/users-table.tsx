@@ -22,6 +22,17 @@ import {
   CardAction,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+const MEDICAL_EXAM_URL =
+  "https://medi-book-web.onrender.com/patient/reservation-turns";
 
 const UsersActionColumn = ({
   row,
@@ -34,6 +45,7 @@ const UsersActionColumn = ({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
+  const [showMedicalModal, setShowMedicalModal] = useState(false);
   const queryClient = useQueryClient();
   const { selectedSede } = useStore();
   const { mutate: evaluateChallenges } = useEvaluateChallenges();
@@ -47,9 +59,14 @@ const UsersActionColumn = ({
   const handleEnroll = async (classId: number) => {
     try {
       setIsLoading(true);
-      await apiService.post(enrolled ? "/user/unenroll" : "/user/enroll", {
-        classId,
-      });
+      const response = await apiService.post(
+        enrolled ? "/user/unenroll" : "/user/enroll",
+        {
+          classId,
+        }
+      );
+
+      const points = response.pointsAwarded;
 
       const wasEnrolled = enrolled;
       setEnrolled(!enrolled);
@@ -57,7 +74,9 @@ const UsersActionColumn = ({
       toast.success(
         enrolled
           ? "Inscripción cancelada con éxito"
-          : "Inscripción realizada con éxito",
+          : `Inscripción realizada con éxito\n Puntos obtenidos: ${
+              points ?? 10
+            }`,
         { id: "enroll-class" }
       );
 
@@ -92,6 +111,8 @@ const UsersActionColumn = ({
         toast.error("Con el plan básico solo puedes inscribirte en 3 clases", {
           id: "enroll-class",
         });
+      } else if (error?.status === 421) {
+        setShowMedicalModal(true);
       } else {
         toast.error("Hubo un error al procesar tu solicitud", {
           id: "enroll-class",
@@ -102,33 +123,66 @@ const UsersActionColumn = ({
     }
   };
 
+  const handleOpenMedicalExam = () => {
+    window.open(MEDICAL_EXAM_URL, "_blank", "noopener,noreferrer");
+    setShowMedicalModal(false);
+  };
+
   return (
-    <div className="px-4 py-2 flex gap-2 items-center justify-end">
-      <ClerkLoading>
-        <Skeleton className="w-[150px] h-[36px]" />
-      </ClerkLoading>
-      <ClerkLoaded>
-        {enrolled ? (
-          <Button
-            variant="destructive"
-            onClick={() => handleEnroll(row.original.id)}
-            disabled={isLoading}
-            className="w-[150px]"
-          >
-            {isLoading ? "Cancelando..." : "Cancelar inscripción"}
-          </Button>
-        ) : (
-          <Button
-            variant="default"
-            onClick={() => handleEnroll(row.original.id)}
-            disabled={isLoading}
-            className="w-[150px]"
-          >
-            {isLoading ? "Inscribiendo..." : "Inscribirse"}
-          </Button>
-        )}
-      </ClerkLoaded>
-    </div>
+    <>
+      <Dialog open={showMedicalModal} onOpenChange={setShowMedicalModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Apto Médico Requerido</DialogTitle>
+            <DialogDescription>
+              Para inscribirte en una clase debes realizar el apto médico.
+              Puedes hacerlo en este link.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowMedicalModal(false)}
+              aria-label="Cerrar modal"
+            >
+              Cerrar
+            </Button>
+            <Button
+              onClick={handleOpenMedicalExam}
+              aria-label="Ir a realizar apto médico"
+            >
+              Realizar Apto Médico
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <div className="px-4 py-2 flex gap-2 items-center justify-end">
+        <ClerkLoading>
+          <Skeleton className="w-[150px] h-[36px]" />
+        </ClerkLoading>
+        <ClerkLoaded>
+          {enrolled ? (
+            <Button
+              variant="destructive"
+              onClick={() => handleEnroll(row.original.id)}
+              disabled={isLoading}
+              className="w-[150px]"
+            >
+              {isLoading ? "Cancelando..." : "Cancelar inscripción"}
+            </Button>
+          ) : (
+            <Button
+              variant="default"
+              onClick={() => handleEnroll(row.original.id)}
+              disabled={isLoading}
+              className="w-[150px]"
+            >
+              {isLoading ? "Inscribiendo..." : "Inscribirse"}
+            </Button>
+          )}
+        </ClerkLoaded>
+      </div>
+    </>
   );
 };
 const MobileActionButton = ({
@@ -142,6 +196,7 @@ const MobileActionButton = ({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
+  const [showMedicalModal, setShowMedicalModal] = useState(false);
   const queryClient = useQueryClient();
   const { selectedSede } = useStore();
   const { mutate: evaluateChallenges } = useEvaluateChallenges();
@@ -200,6 +255,8 @@ const MobileActionButton = ({
         toast.error("Con el plan básico solo puedes inscribirte en 3 clases", {
           id: "enroll-class",
         });
+      } else if (error?.status === 421) {
+        setShowMedicalModal(true);
       } else {
         toast.error("Hubo un error al procesar tu solicitud", {
           id: "enroll-class",
@@ -210,35 +267,68 @@ const MobileActionButton = ({
     }
   };
 
+  const handleOpenMedicalExam = () => {
+    window.open(MEDICAL_EXAM_URL, "_blank", "noopener,noreferrer");
+    setShowMedicalModal(false);
+  };
+
   return (
-    <CardAction className="mt-2">
-      <ClerkLoading>
-        <Skeleton className="w-full h-[36px]" />
-      </ClerkLoading>
-      <ClerkLoaded>
-        {enrolled ? (
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => handleEnroll(gymClass.id)}
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? "Cancelando..." : "Cancelar inscripción"}
-          </Button>
-        ) : (
-          <Button
-            size="sm"
-            variant="default"
-            onClick={() => handleEnroll(gymClass.id)}
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? "Inscribiendo..." : "Inscribirse"}
-          </Button>
-        )}
-      </ClerkLoaded>
-    </CardAction>
+    <>
+      <Dialog open={showMedicalModal} onOpenChange={setShowMedicalModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Apto Médico Requerido</DialogTitle>
+            <DialogDescription>
+              Para inscribirte en una clase debes realizar el apto médico.
+              Puedes hacerlo en este link.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowMedicalModal(false)}
+              aria-label="Cerrar modal"
+            >
+              Cerrar
+            </Button>
+            <Button
+              onClick={handleOpenMedicalExam}
+              aria-label="Ir a realizar apto médico"
+            >
+              Realizar Apto Médico
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <CardAction className="mt-2">
+        <ClerkLoading>
+          <Skeleton className="w-full h-[36px]" />
+        </ClerkLoading>
+        <ClerkLoaded>
+          {enrolled ? (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => handleEnroll(gymClass.id)}
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? "Cancelando..." : "Cancelar inscripción"}
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="default"
+              onClick={() => handleEnroll(gymClass.id)}
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? "Inscribiendo..." : "Inscribirse"}
+            </Button>
+          )}
+        </ClerkLoaded>
+      </CardAction>
+    </>
   );
 };
 
